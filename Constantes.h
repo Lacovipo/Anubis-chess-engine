@@ -1,0 +1,282 @@
+
+#pragma once
+
+#include "Preprocesador.h"
+#include "Tipos.h"
+
+// General
+#define TRUE			1
+#define FALSE			0
+
+// Límites de arrays
+#define	MAX_POSICIONES	1024
+#define	MAX_JUGADAS		4096
+#define	MAX_PLIES		150
+#define	MAX_COMANDOS	2048	// Para el thread del motor
+
+// Enroques
+#define ENR_CB			(UINT8)1
+#define ENR_LB			(UINT8)2
+#define ENR_CN			(UINT8)4
+#define ENR_LN			(UINT8)8
+
+// Comandos del motor (Código en TComandoMotor)
+#define COM_GO			(UINT32)2
+#define COM_STOP		(UINT32)3
+
+// Búsqueda
+#define INFINITO				100000
+#define VICTORIA				40000
+#define TABLAS					0
+#define NO_EVAL					(-INFINITO - 1)
+#define CONTADOR_ORDEN_ROOT_INI	1000000
+#define TB_GANA					(INFINITO/2)
+#define TB_PIERDE				(-(INFINITO/2))
+#define BOUND_EXACTO			0x02
+#define BOUND_UPPER				0x04
+#define BOUND_LOWER				0x08
+
+// Piezas
+#define VACIO	(UINT32)0
+#define PB		(UINT32)1	// 0000 0001
+#define CB		(UINT32)2	// 0000 0010
+#define AB		(UINT32)3	// 0000 0011
+#define TB		(UINT32)4	// 0000 0100
+#define DB		(UINT32)5	// 0000 0101
+#define RB		(UINT32)6	// 0000 0110
+#define PN		(UINT32)9	// 0000 1001
+#define CN		(UINT32)10	// 0000 1010
+#define AN		(UINT32)11	// 0000 1011
+#define TN		(UINT32)12	// 0000 1100
+#define DN		(UINT32)13	// 0000 1101
+#define RN		(UINT32)14	// 0000 1110
+
+// Colores
+#define BLANCAS				(UINT32)1
+#define NEGRAS				(UINT32)0
+#define COLOR_INDEFINIDO	(UINT32)2
+
+// Declaradas "const"
+extern const UINT64		au64Fila[8];
+extern const UINT64		au64Columna[8];
+extern const TJugada	JUGADA_NULA;
+extern const UINT8		au8Log2[64];
+extern const UINT32		u32INC_DESCONOCIDA;
+extern const UINT32		u32INC_BAJA;
+extern const UINT32		u32INC_MEDIA;
+extern const UINT32		u32INC_ALTA;
+extern const SINT8		as32PSReyFinalPeonesAmbosFlancos[64];
+extern const SINT8		as32PSReyFinalPeonesFlancoR[64];
+extern const SINT8		as32PSReyFinalPeonesFlancoD[64];
+extern const SINT8		as8PSPeonPasadoBlancoFP[64];
+extern const SINT8		as8PSPeonPasadoNegroFP[64]; // Positivo pq luego se resta
+extern const SINT8		as8psColorCasilla[64];
+
+// Bitboards
+#define BB_TABLEROVACIO		(UINT64)0
+#define BB_TABLEROLLENO		(UINT64)0xFFFFFFFFFFFFFFFF
+#define BB_FILA8H8			(UINT64)0xFF00000000000000
+#define BB_FILA7H7			(UINT64)0x00FF000000000000
+#define BB_FILA6H6			(UINT64)0x0000FF0000000000
+#define BB_FILA5H5			(UINT64)0x000000FF00000000
+#define BB_FILA4H4			(UINT64)0x00000000FF000000
+#define BB_FILA3H3			(UINT64)0x0000000000FF0000
+#define BB_FILA2H2			(UINT64)0x000000000000FF00
+#define BB_FILA1H1			(UINT64)0x00000000000000FF
+#define BB_COLA1A8			(UINT64)0x8080808080808080
+#define BB_COLB1B8			(UINT64)0x4040404040404040
+#define BB_COLC1C8			(UINT64)0x2020202020202020
+#define BB_COLD1D8			(UINT64)0x1010101010101010
+#define BB_COLE1E8			(UINT64)0x0808080808080808
+#define BB_COLF1F8			(UINT64)0x0404040404040404
+#define BB_COLG1G8			(UINT64)0x0202020202020202
+#define BB_COLH1H8			(UINT64)0x0101010101010101
+#define BB_SINCOLIZDA		(UINT64)0x7F7F7F7F7F7F7F7F
+#define BB_SINCOLDCHA		(UINT64)0xFEFEFEFEFEFEFEFE
+#define BB_SIN2COLSIZDA		(UINT64)0x3F3F3F3F3F3F3F3F
+#define BB_SIN2COLSDCHA		(UINT64)0xFCFCFCFCFCFCFCFC
+#define BB_F1G1				(UINT64)0x0000000000000006
+#define BB_B1C1D1			(UINT64)0x0000000000000070
+#define BB_F8G8				(UINT64)0x0600000000000000
+#define BB_B8C8D8			(UINT64)0x7000000000000000
+#define BB_MITADSUPERIOR	(UINT64)0xFFFFFFFF00000000
+#define BB_MITADINFERIOR	(UINT64)0x00000000FFFFFFFF
+#define BB_FLANCODAMA		(UINT64)0xF0F0F0F0F0F0F0F0
+#define BB_FLANCOREY		(UINT64)0x0F0F0F0F0F0F0F0F
+#define BB_ZONAFUERTECB		(UINT64)0x00183C3C3C000000 // zona donde es fuerte un caballo blanco sólidamente situado
+#define BB_ZONAFUERTECN		(UINT64)0x0000003C3C3C1800 // zona donde es fuerte un caballo negro sólidamente situado
+#define BB_ZONAMALAC		(UINT64)0xFB818100008181FB // zona donde un caballo está mal situado
+#define BB_ESQUINAA8		(UINT64)0xC0C0000000000000
+#define BB_ESQUINAH8		(UINT64)0x0303000000000000
+#define BB_ESQUINAA1		(UINT64)0x000000000000C0C0
+#define BB_ESQUINAH1		(UINT64)0x0000000000000303
+#define BB_CASILLASBLANCAS	(UINT64)0xAA55AA55AA55AA55
+#define BB_CASILLASNEGRAS	(UINT64)0x55AA55AA55AA55AA
+
+#define BB_A1				(UINT64)0x0000000000000080
+#define BB_A2				(UINT64)0x0000000000008000
+#define BB_A3				(UINT64)0x0000000000800000
+#define BB_A4				(UINT64)0x0000000080000000
+#define BB_A5				(UINT64)0x0000008000000000
+#define BB_A6				(UINT64)0x0000800000000000
+#define BB_A7				(UINT64)0x0080000000000000
+#define BB_A8				(UINT64)0x8000000000000000
+
+#define BB_B1				(UINT64)0x0000000000000040
+#define BB_B2				(UINT64)0x0000000000004000
+#define BB_B3				(UINT64)0x0000000000400000
+#define BB_B4				(UINT64)0x0000000040000000
+#define BB_B5				(UINT64)0x0000004000000000
+#define BB_B6				(UINT64)0x0000400000000000
+#define BB_B7				(UINT64)0x0040000000000000
+#define BB_B8				(UINT64)0x4000000000000000
+
+#define BB_C1				(UINT64)0x0000000000000020
+#define BB_C2				(UINT64)0x0000000000002000
+#define BB_C3				(UINT64)0x0000000000200000
+#define BB_C4				(UINT64)0x0000000020000000
+#define BB_C5				(UINT64)0x0000002000000000
+#define BB_C6				(UINT64)0x0000200000000000
+#define BB_C7				(UINT64)0x0020000000000000
+#define BB_C8				(UINT64)0x2000000000000000
+
+#define BB_D1				(UINT64)0x0000000000000010
+#define BB_D2				(UINT64)0x0000000000001000
+#define BB_D3				(UINT64)0x0000000000100000
+#define BB_D4				(UINT64)0x0000000010000000
+#define BB_D5				(UINT64)0x0000001000000000
+#define BB_D6				(UINT64)0x0000100000000000
+#define BB_D7				(UINT64)0x0010000000000000
+#define BB_D8				(UINT64)0x1000000000000000
+
+#define BB_E1				(UINT64)0x0000000000000008
+#define BB_E2				(UINT64)0x0000000000000800
+#define BB_E3				(UINT64)0x0000000000080000
+#define BB_E4				(UINT64)0x0000000008000000
+#define BB_E5				(UINT64)0x0000000800000000
+#define BB_E6				(UINT64)0x0000080000000000
+#define BB_E7				(UINT64)0x0008000000000000
+#define BB_E8				(UINT64)0x0800000000000000
+
+#define BB_F1				(UINT64)0x0000000000000004
+#define BB_F2				(UINT64)0x0000000000000400
+#define BB_F3				(UINT64)0x0000000000040000
+#define BB_F4				(UINT64)0x0000000004000000
+#define BB_F5				(UINT64)0x0000000400000000
+#define BB_F6				(UINT64)0x0000040000000000
+#define BB_F7				(UINT64)0x0004000000000000
+#define BB_F8				(UINT64)0x0400000000000000
+
+#define BB_G1				(UINT64)0x0000000000000002
+#define BB_G2				(UINT64)0x0000000000000200
+#define BB_G3				(UINT64)0x0000000000020000
+#define BB_G4				(UINT64)0x0000000002000000
+#define BB_G5				(UINT64)0x0000000200000000
+#define BB_G6				(UINT64)0x0000020000000000
+#define BB_G7				(UINT64)0x0002000000000000
+#define BB_G8				(UINT64)0x0200000000000000
+
+#define BB_H1				(UINT64)0x0000000000000001
+#define BB_H2				(UINT64)0x0000000000000100
+#define BB_H3				(UINT64)0x0000000000010000
+#define BB_H4				(UINT64)0x0000000001000000
+#define BB_H5				(UINT64)0x0000000100000000
+#define BB_H6				(UINT64)0x0000010000000000
+#define BB_H7				(UINT64)0x0001000000000000
+#define BB_H8				(UINT64)0x0100000000000000
+
+#define COLA				(UINT32)0
+#define COLB				(UINT32)1
+#define COLC				(UINT32)2
+#define COLD				(UINT32)3
+#define COLE				(UINT32)4
+#define COLF				(UINT32)5
+#define COLG				(UINT32)6
+#define COLH				(UINT32)7
+
+// Tablero
+extern const char *aszCuadros[64];
+#define TAB_ALPASOIMPOSIBLE	64
+#define TAB_A1				56
+#define TAB_B1				57
+#define TAB_C1				58
+#define TAB_D1				59
+#define TAB_E1				60
+#define TAB_F1				61
+#define TAB_G1				62
+#define TAB_H1				63
+#define TAB_A2				48
+#define TAB_B2				49
+#define TAB_C2				50
+#define TAB_D2				51
+#define TAB_E2				52
+#define TAB_F2				53
+#define TAB_G2				54
+#define TAB_H2				55
+#define TAB_A3				40
+#define TAB_B3				41
+#define TAB_C3				42
+#define TAB_D3				43
+#define TAB_E3				44
+#define TAB_F3				45
+#define TAB_G3				46
+#define TAB_H3				47
+#define TAB_A4				32
+#define TAB_B4				33
+#define TAB_C4				34
+#define TAB_D4				35
+#define TAB_E4				36
+#define TAB_F4				37
+#define TAB_G4				38
+#define TAB_H4				39
+#define TAB_A5				24
+#define TAB_B5				25
+#define TAB_C5				26
+#define TAB_D5				27
+#define TAB_E5				28
+#define TAB_F5				29
+#define TAB_G5				30
+#define TAB_H5				31
+#define TAB_A6				16
+#define TAB_B6				17
+#define TAB_C6				18
+#define TAB_D6				19
+#define TAB_E6				20
+#define TAB_F6				21
+#define TAB_G6				22
+#define TAB_H6				23
+#define TAB_A7				8
+#define TAB_B7				9
+#define TAB_C7				10
+#define TAB_D7				11
+#define TAB_E7				12
+#define TAB_F7				13
+#define TAB_G7				14
+#define TAB_H7				15
+#define TAB_A8				0
+#define TAB_B8				1
+#define TAB_C8				2
+#define TAB_D8				3
+#define TAB_E8				4
+#define TAB_F8				5
+#define TAB_G8				6
+#define TAB_H8				7
+
+#define TAB_ARRIBA			(-8)
+#define TAB_ARRIBA_IZDA		(-9)
+#define TAB_ARRIBA_DCHA		(-7)
+#define TAB_IZQUIERDA		(-1)
+#define TAB_DERECHA			(1)
+#define TAB_ABAJO_IZDA		(7)
+#define TAB_ABAJO			(8)
+#define TAB_ABAJO_DCHA		(9)
+
+#define VAL_PEON    100
+#define VAL_CABALLO 300
+#define VAL_ALFIL   300
+#define VAL_TORRE   500
+#define VAL_DAMA    1000
+
+extern const UINT64 BB_ATAQUES_REY[];
+extern const UINT64 BB_ATAQUES_CABALLO[64];
+extern const UINT64 BB_ATAQUES_ALFIL[64];
