@@ -247,7 +247,7 @@ SINT32 AlfaBeta(TPosicion * pPos, SINT32 s32Alfa, SINT32 s32Beta, SINT32 s32Prof
 
 		#define PODA_HASH_ALFA_BASE 250			// Diferencia base contra alfa
 		#define PODA_HASH_ALFA_MULT_DIF 100		// Multiplicador por cada diferencia de profundidad adicional en alfa
-		#define PODA_HASH_ALFA_MULT_PROF 13		// Multiplicador por cada profundidad adicional en alfa
+		#define PODA_HASH_ALFA_MULT_PROF 10		// Multiplicador por cada profundidad adicional en alfa
 
 		//
 		// Poda hash beta

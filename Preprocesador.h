@@ -87,7 +87,7 @@
 #define AVX512
 
 #if defined(VERS_301)
-	#define VERSION "Anubis v3.01g"
+	#define VERSION "Anubis v3.01_"
 	#define NOMBRE_LOG "An_3.01_"
 
 
