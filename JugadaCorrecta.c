@@ -11,9 +11,6 @@
  *
  * Devuelve: TRUE si la jugada es pseudo-legal, FALSE en caso contrario
  *
- * Descripción: Dada una jugada que, normalmente, vendrá de la tabla hash, se hacen las comprobaciones que se pueden
- *  para verificar la pseudo-legalidad del movimiento
- *
  */
 BOOL JugadaCorrecta(TPosicion * pPos, TJugada jug)
 {

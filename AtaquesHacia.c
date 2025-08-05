@@ -43,29 +43,22 @@ UINT64 AtaquesHacia(TPosicion * pPos, UINT32 u32Casilla)
 	UINT32 u32Origen;
 
 	// Caballos
-	u64Ataques |= ((pPos->u64CaballosB | pPos->u64CaballosN)
-					& BB_ATAQUES_CABALLO[u32Casilla]);
+	u64Ataques |= ((pPos->u64CaballosB | pPos->u64CaballosN) & BB_ATAQUES_CABALLO[u32Casilla]);
 	// Alfiles o damas
-	u64Desde = (pPos->u64AlfilesB | pPos->u64DamasB | pPos->u64AlfilesN | pPos->u64DamasN)
-				& BB_ATAQUES_ALFIL[u32Casilla];
+	u64Desde = (pPos->u64AlfilesB | pPos->u64DamasB | pPos->u64AlfilesN | pPos->u64DamasN) & BB_ATAQUES_ALFIL[u32Casilla];
 	while (u64Desde)
 	{
-		//u32Origen = PrimerUno(u64Desde);
 		u32Origen = BB_GetBitYQuitar(&u64Desde);
 		if (!(au64Entre[u32Origen][u32Casilla] & u64Todas))
 			u64Ataques |= BB_Mask(u32Origen);
-		//BB_InvertirBit(&u64Desde,u32Origen);
 	}
 	// Torres o damas
-	u64Desde = (pPos->u64TorresB | pPos->u64DamasB | pPos->u64TorresN | pPos->u64DamasN)
-				& au64AtaquesTorre[u32Casilla];
+	u64Desde = (pPos->u64TorresB | pPos->u64DamasB | pPos->u64TorresN | pPos->u64DamasN) & au64AtaquesTorre[u32Casilla];
 	while (u64Desde)
 	{
-		//u32Origen = PrimerUno(u64Desde);
 		u32Origen = BB_GetBitYQuitar(&u64Desde);
 		if (!(au64Entre[u32Origen][u32Casilla] & u64Todas))
 			u64Ataques |= BB_Mask(u32Origen);
-		//BB_InvertirBit(&u64Desde,u32Origen);
 	}
 	// Peones blancos
 	if (u32Casilla < 48)
@@ -115,12 +108,10 @@ UINT64 AtaquesB_ZonaN(TPosicion * pPos,UINT64 u64Zona)
 
 	u64Origenes = AtaquesPeonN(u64Zona) & pPos->u64PeonesB;
 	u64Origenes |= AtaquesCaballo(u64Zona) & pPos->u64CaballosB;
-	u64Origenes |= AtaquesAlfil(u64Zona,~(pPos->u64PeonesB | pPos->u64PeonesN | pPos->u64AlfilesN | pPos->u64CaballosN))
-		& pPos->u64AlfilesB;
+	u64Origenes |= AtaquesAlfil(u64Zona,~(pPos->u64PeonesB | pPos->u64PeonesN | pPos->u64AlfilesN | pPos->u64CaballosN)) & pPos->u64AlfilesB;
 	u64Origenes |= AtaquesAlfil(u64Zona,~(pPos->u64PeonesB | pPos->u64TodasN)) & pPos->u64DamasB;
 	u64Origenes |= AtaquesTorre(u64Zona,~(pPos->u64PeonesB | pPos->u64TodasN)) & pPos->u64DamasB;
-	u64Origenes |= AtaquesTorre(u64Zona,~(pPos->u64PeonesB | pPos->u64PeonesN | pPos->u64AlfilesN | pPos->u64CaballosN | pPos->u64TorresN))
-		& pPos->u64TorresB;
+	u64Origenes |= AtaquesTorre(u64Zona,~(pPos->u64PeonesB | pPos->u64PeonesN | pPos->u64AlfilesN | pPos->u64CaballosN | pPos->u64TorresN)) & pPos->u64TorresB;
 
 	return(u64Origenes);
 }
@@ -134,12 +125,10 @@ UINT64 AtaquesN_ZonaB(TPosicion * pPos,UINT64 u64Zona)
 
 	u64Origenes = AtaquesPeonB(u64Zona) & pPos->u64PeonesN;
 	u64Origenes |= AtaquesCaballo(u64Zona) & pPos->u64CaballosN;
-	u64Origenes |= AtaquesAlfil(u64Zona,~(pPos->u64PeonesN | pPos->u64PeonesB | pPos->u64AlfilesB | pPos->u64CaballosB))
-		& pPos->u64AlfilesN;
+	u64Origenes |= AtaquesAlfil(u64Zona,~(pPos->u64PeonesN | pPos->u64PeonesB | pPos->u64AlfilesB | pPos->u64CaballosB)) & pPos->u64AlfilesN;
 	u64Origenes |= AtaquesAlfil(u64Zona,~(pPos->u64PeonesN | pPos->u64TodasB)) & pPos->u64DamasN;
 	u64Origenes |= AtaquesTorre(u64Zona,~(pPos->u64PeonesN | pPos->u64TodasB)) & pPos->u64DamasN;
-	u64Origenes |= AtaquesTorre(u64Zona,~(pPos->u64PeonesN | pPos->u64PeonesB | pPos->u64AlfilesB | pPos->u64CaballosB | pPos->u64TorresB))
-		& pPos->u64TorresN;
+	u64Origenes |= AtaquesTorre(u64Zona,~(pPos->u64PeonesN | pPos->u64PeonesB | pPos->u64AlfilesB | pPos->u64CaballosB | pPos->u64TorresB)) & pPos->u64TorresN;
 
 	return(u64Origenes);
 }

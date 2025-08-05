@@ -37,15 +37,6 @@ static void LocalizarJugHash(TJugada * pJug1, TJugada * pJug2, TJugada jugHash)
  *
  * Devuelve: El valor QSearch del nodo analizado
  *
- * Descripción: Realiza una búsqueda de capturas + jaques a profundidad limitada, siguiendo las recomendaciones de Ed Scröeder en su
- *	artículo sobre REBEL. Como en la QSearch normal, intentamos podar (beta cutoff) con capturas ganadoras (SEE) y descartamos las
- *	perdedoras. Después, si no hemos logrado podar, generamos los jaques y los intentamos. Por otro lado, si en la posición actual
- *	estamos en jaque, intentamos todas las jugadas. Si sólo hay una jugada legal, extendemos dos plies; si hay dos extendemos un ply
- *	Esta función dispone de una tabla hash particular
- *
- * Nota: a medio revisar
- * Nota: las correcciones son principalmente estéticas; la lógica deberá ser revisada a fondo más adelante
- *
  */
 SINT32 QSConJaques(TPosicion * pPos, SINT32 s32Alfa, SINT32 s32Beta, SINT32 s32Ply, SINT32 s32Prof)
 {
@@ -59,7 +50,7 @@ SINT32 QSConJaques(TPosicion * pPos, SINT32 s32Alfa, SINT32 s32Beta, SINT32 s32P
 	BOOL		bComprobarTodo;
 	SINT32		s32AlfaOriginal = s32Alfa;
 
-	// 30/01/25 0.60e Profundidad selectiva
+	// Profundidad selectiva
 	if (s32Ply > dbDatosBusqueda.s32ProfSel)
 		dbDatosBusqueda.s32ProfSel = s32Ply;
 
@@ -86,7 +77,7 @@ SINT32 QSConJaques(TPosicion * pPos, SINT32 s32Alfa, SINT32 s32Beta, SINT32 s32P
 		return(TABLAS);
 
 	//
-	// 05/02/25 0.62i Poda de distancia a mate
+	// Poda de distancia a mate
 	//
 	{
 		s32Alfa = max(-INFINITO + s32Ply, s32Alfa);
@@ -235,8 +226,7 @@ SINT32 QSConJaques(TPosicion * pPos, SINT32 s32Alfa, SINT32 s32Beta, SINT32 s32P
 					u32Legales--;
 					if (!u32Legales)
 					{
-						// Es posible estar aquí no estando en jaque, si el rey no tiene casillas. Si además no tengo jugadas legales disponibles,
-						//	estoy ahogado
+						// Es posible estar aquí no estando en jaque, si el rey no tiene casillas. Si además no tengo jugadas legales disponibles, estoy ahogado
 						if (Pos_GetJaqueado(pPos))
 							return(-INFINITO + s32Ply);
 						else

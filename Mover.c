@@ -18,9 +18,6 @@
 #include "nnue.h"
 #include <string.h>
 
-// Devuelve la feature de la pieza capturada
-// OJO: si la pieza capturada es una torre, se pueden perder derechos de enroque. No afecta a la búsqueda porque no va a generar enroque sin la torre,
-//	pero puede afectar a la evaluación... cuidadito. Por ahora, lo dejo sin arreglar
 static inline void Captura(TPosicion* pPosNueva, UINT32 u32PiezaEnDestino, UINT32 u32Hasta, UINT64 BBMASK_HASTA)
 {
 	// Actualizar contadores de tablas

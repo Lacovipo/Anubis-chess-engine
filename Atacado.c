@@ -9,12 +9,8 @@
  *
  * Atacado
  *
- *
- * Recibe: un puntero a la posición actual, una casilla y el color de las piezas atacantes
- *
- * Devuelve: TRUE si la casilla está atacada por el bando indicado, FALSE en caso contrario
- *
- * Descripción: Trata de generar jugadas a partir de la casilla dada para cada tipo de pieza. Luego comprueba si tal pieza está en el destino esperado. Devuelve TRUE tan pronto como encuentra un ataque sobre la casilla
+ * Descripción: Trata de generar jugadas a partir de la casilla dada para cada tipo de pieza. Luego comprueba si tal pieza está en el destino esperado.
+ *				Devuelve TRUE tan pronto como encuentra un ataque sobre la casilla.
  *
  */
 UINT32 Atacado(TPosicion * pPos, UINT32 u32Casilla, UINT32 u32Color)
@@ -28,12 +24,6 @@ UINT32 Atacado(TPosicion * pPos, UINT32 u32Casilla, UINT32 u32Color)
 		//
 		// BLANCAS
 		//
-		//{
-		//	UINT64 u64TodosLosAtaques = au64AtaquesPeonN[u32Casilla] | BB_ATAQUES_CABALLO[u32Casilla] | BB_ATAQUES_ALFIL[u32Casilla] | au64AtaquesTorre[u32Casilla] | BB_ATAQUES_REY[u32Casilla];
-
-		//	if (u64TodosLosAtaques & pPos->u64TodasB == BB_TABLEROVACIO)
-		//		return(FALSE);
-		//}
 
 		// Caballos
 		if (pPos->u64CaballosB & BB_ATAQUES_CABALLO[u32Casilla])

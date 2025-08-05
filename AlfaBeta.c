@@ -849,10 +849,6 @@ SINT32 AlfaBeta(TPosicion * pPos, SINT32 s32Alfa, SINT32 s32Beta, SINT32 s32Prof
  *
  * AlfaBetaPV
  *
- * Recibe: Un puntero a la posición actual, alfa, beta, la profundidad, el ply actual
- *
- * Devuelve: El valor AlfaBeta correspondiente al nodo analizado
- *
  */
 SINT32 AlfaBetaPV(TPosicion * pPos, SINT32 s32Alfa, SINT32 s32Beta, SINT32 s32Prof, SINT32 s32Ply)
 {
@@ -914,7 +910,6 @@ SINT32 AlfaBetaPV(TPosicion * pPos, SINT32 s32Alfa, SINT32 s32Beta, SINT32 s32Pr
 		s32Val = QSConJaques(pPos, s32Alfa, s32Beta, s32Ply, QS_PROF_JAQUES);
 		return(s32Val);
 	}
-
 
 	//
 	// Poda de distancia a mate

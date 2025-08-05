@@ -107,7 +107,7 @@ void Jug2Algebraica(TJugada jug, char * szJugada)
 
 /*
  * 
- * 31/01/25 0.61 Jug2SAN
+ * Jug2SAN
  * 
  * Llamamos a esta función después de hacer la jugada, luego la posición de las piezas es la de pPos-1 y el jaque es pPos
  * 
@@ -177,8 +177,6 @@ void ExtraerPVdeArray(TPosicion * pPos,char * szPV)
 		dbDatosBusqueda.u32NumNodos--; // Lo incrementa Mover
 
 		pPosTemp++;
-		// 31/01/25 0.61 Cambio algebraica por SAN
-		//Jug2Algebraica(dbDatosBusqueda.ajugPV[0][i], szJugada);
 		Jug2SAN(pPosTemp, dbDatosBusqueda.ajugPV[0][i], szJugada);
 		strcat(szPV, szJugada);
 		strcat(szPV," ");
@@ -211,8 +209,6 @@ void ExtraerPVdeArray(TPosicion * pPos,char * szPV)
 		dbDatosBusqueda.u32NumNodos--;
 
 		pPosTemp++;
-		// 31/01/25 0.61 Cambio algebraica por SAN
-		//Jug2Algebraica(pNodoHash->jug, szJugada);
 		Jug2SAN(pPosTemp, jug, szJugada);
 		strcat(szPV, szJugada);
 		strcat(szPV," ");
@@ -220,11 +216,11 @@ void ExtraerPVdeArray(TPosicion * pPos,char * szPV)
 		if (Pos_GetTurno(pPosTemp) == BLANCAS)
 			strcat(szPV, ". ");
 
-		// 14/12/24 - Para tener una jugada que ponderar (de hash) en caso de no tenerla de PV
+		// Para tener una jugada que ponderar (de hash) en caso de no tenerla de PV
 		if (j == 0 && Jug_GetEsNula(dbDatosBusqueda.ajugPV[0][1]))
 			dbDatosBusqueda.ajugPV[0][1] = jug;
 
-		// 24/12/24 - Para no repetir muchas jugadas de la tabla hash (no puedo llamar a SegundaRepetición porque uso otra pila)
+		// Para no repetir muchas jugadas de la tabla hash (no puedo llamar a SegundaRepetición porque uso otra pila)
 		if (pPosTemp > &aPos[0])
 		{
 			for (TPosicion* p = pPosTemp - 1; p > &aPos[0]; p--)

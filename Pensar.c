@@ -367,7 +367,6 @@ void Pensar(TPosicion * pPos)
 	for (int i = 0; i < 64; i++)
 		for (int j = 0; j < 64; j++)
 			as32Historia[i][j] /= 2;
-	//memset(au32Refuta, 0, sizeof(au32Refuta));
 
 	//
 	// EGTB (chikki)

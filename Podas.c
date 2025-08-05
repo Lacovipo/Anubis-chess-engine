@@ -10,13 +10,9 @@
 /*
  * PodarContraBeta
  *
- * Recibe: Puntero a la posición actual (sin hacer ningún movimiento), ply actual, profundidad restante, alfa,
- *  beta y el valor original de alfa antes de ninguna rectificación que haya podido ocurrir durante	la búsqueda
- *  (incrementos)
+ * Recibe: Puntero a la posición actual (sin hacer ningún movimiento), ply actual, profundidad restante...
  *
  * Devuelve: TRUE si hay que podar completamente el subárbol o FALSE en caso contrario
- *
- * Descripción: Dependiendo de una serie de condiciones, decide qué método de poda corresponde intentar, lo intenta y devuelve si se debe podar o no
  *
  */
 BOOL PodarContraBeta(TPosicion * pPos, SINT32 s32Ply, SINT32 s32Prof, SINT32 s32Beta, BOOL bMejorando)
@@ -171,7 +167,6 @@ fin_Static:
 		// Caissa 1.22:		R = 3 + prof / 3				+ min((eval - beta) / 133, 3) + improving														// >= 10
 		// Cataphract 1.0:	R = 3 + prof / 5				+ min((eval - beta) / 200, 2) + improving														// no verif
 		// Obsidian 16:		R = 4 + prof / 4				+ min((eval - beta) / 147, 4) + ttMoveNoisy														// no verif
-		// ElBurro:			R = 4 +							+ min((eval - beta) /  32, 3)																	// no verif
 		// Tucano 12:		R = 5 + ((prof-4)/4)            + min((eval - beta) / 200, 3) + (move_is_quiet(last_move) ? 0 : 1)								// no verif
 		// Arasan 25:		R = 4 + prof / (4 + 4 * lowmat) + min((eval - beta) / 200, 4) - (lowmat * prof)						// lowmat = (piezas <= 3)	// >=  6
 		// Altair 7.1.5:	R = 5 + prof / 4				+ (eval-beta) / 400 [entre -1 y 3]																// >  15

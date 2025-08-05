@@ -77,7 +77,6 @@ void Aspiracion(TPosicion* pPos, TJugada* pJugPV, SINT32 s32Prof)
 	// Ruk 4.0.0:		  17							+= 5 + d/4
 	// CFish 12.5		  17							+= 5 + d/4
 	// Renegade 1.1.9:	  20							+= d / 2
-	// ElBurro 1.3:		   8							+= d / 2
 	// Cadie 2.1:		  10							+= d / 2
 	// Demolito 2025:	  15							+= d / 2
 	// Kobra 2.0:		  17							+= d / 3

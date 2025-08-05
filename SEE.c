@@ -136,38 +136,30 @@ SINT32 SEE(TPosicion * pPos,TJugada jug)
 		case -1:
 		case 8:
 		case -8:
-			u64Temp = au64HaciaElBorde[u32Desde][u32Hasta] &
-				(pPos->u64TorresB | pPos->u64DamasB
-				| pPos->u64TorresN | pPos->u64DamasN);
+			u64Temp = au64HaciaElBorde[u32Desde][u32Hasta] & (pPos->u64TorresB | pPos->u64DamasB | pPos->u64TorresN | pPos->u64DamasN);
 			while (u64Temp)
 			{
-				//u32Temp = PrimerUno(u64Temp);
 				u32Temp = BB_GetBitYQuitar(&u64Temp);
 				if (!(au64Entre[u32Temp][u32Desde] & (pPos->u64TodasB | pPos->u64TodasN)))
 				{
 					BB_SetBit(&u64Ataques,u32Temp);
 					break;
 				}
-				//BB_InvertirBit(&u64Temp,u32Temp);
 			}
 			break;
 		case 7:
 		case -7:
 		case 9:
 		case -9:
-			u64Temp = au64HaciaElBorde[u32Desde][u32Hasta] &
-				(pPos->u64AlfilesB | pPos->u64DamasB
-				| pPos->u64AlfilesN | pPos->u64DamasN);
+			u64Temp = au64HaciaElBorde[u32Desde][u32Hasta] & (pPos->u64AlfilesB | pPos->u64DamasB | pPos->u64AlfilesN | pPos->u64DamasN);
 			while (u64Temp)
 			{
-				//u32Temp = PrimerUno(u64Temp);
 				u32Temp = BB_GetBitYQuitar(&u64Temp);
 				if (!(au64Entre[u32Temp][u32Desde] & (pPos->u64TodasB | pPos->u64TodasN)))
 				{
 					BB_SetBit(&u64Ataques,u32Temp);
 					break;
 				}
-				//BB_InvertirBit(&u64Temp,u32Temp);
 			}
 			break;
 	}
@@ -295,9 +287,7 @@ SINT32 SEE(TPosicion * pPos,TJugada jug)
 			case -1:
 			case 8:
 			case -8:
-				u64Temp = au64HaciaElBorde[u32Desde][u32Hasta] &
-					(pPos->u64TorresB | pPos->u64DamasB
-					| pPos->u64TorresN | pPos->u64DamasN);
+				u64Temp = au64HaciaElBorde[u32Desde][u32Hasta] & (pPos->u64TorresB | pPos->u64DamasB | pPos->u64TorresN | pPos->u64DamasN);
 				while (u64Temp)
 				{
 					u32Temp = PrimerUno(u64Temp);
@@ -313,9 +303,7 @@ SINT32 SEE(TPosicion * pPos,TJugada jug)
 			case -7:
 			case 9:
 			case -9:
-				u64Temp = au64HaciaElBorde[u32Desde][u32Hasta] &
-					(pPos->u64AlfilesB | pPos->u64DamasB
-					| pPos->u64AlfilesN | pPos->u64DamasN);
+				u64Temp = au64HaciaElBorde[u32Desde][u32Hasta] & (pPos->u64AlfilesB | pPos->u64DamasB | pPos->u64AlfilesN | pPos->u64DamasN);
 				while (u64Temp)
 				{
 					u32Temp = PrimerUno(u64Temp);
@@ -484,7 +472,6 @@ SINT32 SEE_Amenaza(TPosicion * pPos, UINT32 u32Hasta, UINT32 u32PiezaQuePongo)
 		if (as32Evals[u32NumEvals] < 0 && u32Turno != Pos_GetTurno(pPos))
 			return(0);
 
-
 		//
 		// Comprobamos si hay ataque descubierto
 		//
@@ -510,9 +497,7 @@ SINT32 SEE_Amenaza(TPosicion * pPos, UINT32 u32Hasta, UINT32 u32PiezaQuePongo)
 			case -7:
 			case 9:
 			case -9:
-				u64Temp = au64HaciaElBorde[u32Desde][u32Hasta] &
-					(pPos->u64AlfilesB | pPos->u64DamasB
-					| pPos->u64AlfilesN | pPos->u64DamasN);
+				u64Temp = au64HaciaElBorde[u32Desde][u32Hasta] & (pPos->u64AlfilesB | pPos->u64DamasB | pPos->u64AlfilesN | pPos->u64DamasN);
 				while (u64Temp)
 				{
 					u32Temp = PrimerUno(u64Temp);
@@ -539,10 +524,8 @@ SINT32 SEE_Amenaza(TPosicion * pPos, UINT32 u32Hasta, UINT32 u32PiezaQuePongo)
 		if (as32Evals[u32NumEvals] > -as32Evals[u32NumEvals - 1])
 			as32Evals[u32NumEvals - 1] = -as32Evals[u32NumEvals];
 	}
-	// Nunca puede ser cero, pues no nos comemos nada en la primera jugada nula, pero lo pongo
-	//	aquí por si acaso.
-	// Luego devuelve en negativo, pues es lo que nos amenaza comernos el contrario sobre esta
-	//	casilla
+	// Nunca puede ser cero, pues no nos comemos nada en la primera jugada nula, pero lo pongo aquí por si acaso.
+	// Luego devuelve en negativo, pues es lo que nos amenaza comernos el contrario sobre esta casilla
 	//
 	if (as32Evals[0] > 0)
 		return(0);

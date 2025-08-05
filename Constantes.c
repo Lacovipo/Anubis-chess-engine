@@ -73,66 +73,6 @@ const UINT8 LSB_64_table[154] =
 #undef __
 };
 
-const SINT8 as32PSReyFinalPeonesAmbosFlancos[64] =
-{
-	-10,-8,-6,-5,-5,-6,-8,-10,
-	 -8,-5,-3,-2,-2,-3,-5, -8,
-	 -6,-2, 0, 2, 2, 0,-2, -6,
-	 -5, 0, 2, 6, 6, 2, 0, -5,
-	 -5, 0, 2, 6, 6, 2, 0, -5,
-	 -6,-2, 0, 2, 2, 0,-2, -6,
-	 -8,-5,-3,-2,-2,-3,-5, -8,
-	-10,-8,-6,-5,-5,-6,-8,-10
-};
-
-const SINT8 as32PSReyFinalPeonesFlancoR[64] =
-{
-	-60,-40,-30,-15,-6,-5,-5,-6,
-	-50,-35,-25,-10,-3,-2,-2,-3,
-	-50,-35,-25,  0, 0, 2, 2, 0,
-	-50,-30,-20,  0, 2, 6, 6, 2,
-	-50,-30,-20,  0, 2, 6, 6, 2,
-	-50,-35,-25,  0, 0, 2, 2, 0,
-	-50,-35,-25,-10,-3,-2,-2,-3,
-	-60,-40,-30,-15,-6,-5,-5,-6
-};
-
-const SINT8 as32PSReyFinalPeonesFlancoD[64] =
-{
-	-6,-5,-5,-6,-15,-30,-40,-60,
-	-3,-2,-2,-3,-10,-25,-35,-50,
-	 0, 2, 2, 0,  0,-25,-35,-50,
-	 2, 6, 6, 2,  0,-20,-30,-50,
-	 2, 6, 6, 2,  0,-20,-30,-50,
-	 0, 2, 2, 0,  0,-25,-35,-50,
-	-3,-2,-2,-3,-10,-25,-35,-50,
-	-6,-5,-5,-6,-15,-30,-40,-60
-};
-
-const SINT8 as8PSPeonPasadoBlancoFP[64] =
-{
-	 0, 0, 0, 0, 0, 0, 0, 0,
-	60,50,40,40,40,40,50,60,
-	50,40,30,30,30,30,40,50,
-	40,30,20,20,20,20,30,40,
-	30,20,10,10,10,10,20,30,
-	20,10, 0, 0, 0, 0,10,20,
-	20,10, 0, 0, 0, 0,10,20,
-	 0, 0, 0, 0, 0, 0, 0, 0
-};
-
-const SINT8 as8PSPeonPasadoNegroFP[64] = // Positivo pq luego se resta
-{
-	 0, 0, 0, 0, 0, 0, 0, 0,
-	20,10, 0, 0, 0, 0,10,20,
-	20,10, 0, 0, 0, 0,10,20,
-	30,20,10,10,10,10,20,30,
-	40,30,20,20,20,20,30,40,
-	50,40,30,30,30,30,40,50,
-	60,50,40,40,40,40,50,60,
-	 0, 0, 0, 0, 0, 0, 0, 0
-};
-
 const SINT8 as8psColorCasilla[64] =
 {
 	1,0,1,0,1,0,1,0,
@@ -147,138 +87,138 @@ const SINT8 as8psColorCasilla[64] =
 
 const UINT64 BB_ATAQUES_REY[64] =
 {
-	BB_B8 | BB_A7 | BB_B7,																					//  0 == A8
-	BB_A8 | BB_A7 | BB_B7 | BB_C7 | BB_C8,													//  1 == B8
-	BB_B8 | BB_B7 | BB_C7 | BB_D7 | BB_D8,													//  2 == C8
-	BB_C8 | BB_C7 | BB_D7 | BB_E7 | BB_E8,													//  3 == D8
-	BB_D8 | BB_D7 | BB_E7 | BB_F7 | BB_F8,													//  4 == E8
-	BB_E8 | BB_E7 | BB_F7 | BB_G7 | BB_G8,													//  5 == F8
-	BB_F8 | BB_F7 | BB_G7 | BB_H7 | BB_H8,													//  6 == G8
-	BB_G8 | BB_G7 | BB_H7,																					//  7 == H8
-	BB_A8 | BB_B8 | BB_B7 | BB_B6 | BB_A6,													//  8 == A7
+	BB_B8 | BB_A7 | BB_B7,											//  0 == A8
+	BB_A8 | BB_A7 | BB_B7 | BB_C7 | BB_C8,							//  1 == B8
+	BB_B8 | BB_B7 | BB_C7 | BB_D7 | BB_D8,							//  2 == C8
+	BB_C8 | BB_C7 | BB_D7 | BB_E7 | BB_E8,							//  3 == D8
+	BB_D8 | BB_D7 | BB_E7 | BB_F7 | BB_F8,							//  4 == E8
+	BB_E8 | BB_E7 | BB_F7 | BB_G7 | BB_G8,							//  5 == F8
+	BB_F8 | BB_F7 | BB_G7 | BB_H7 | BB_H8,							//  6 == G8
+	BB_G8 | BB_G7 | BB_H7,											//  7 == H8
+	BB_A8 | BB_B8 | BB_B7 | BB_B6 | BB_A6,							//  8 == A7
 	BB_A8 | BB_A7 | BB_A6 | BB_B8 | BB_B6 | BB_C8 | BB_C7 | BB_C6,	//  9 == B7
 	BB_B8 | BB_B7 | BB_B6 | BB_C8 | BB_C6 | BB_D8 | BB_D7 | BB_D6,	// 10 == C7
 	BB_C8 | BB_C7 | BB_C6 | BB_D8 | BB_D6 | BB_E8 | BB_E7 | BB_E6,	// 11 == D7
 	BB_D8 | BB_D7 | BB_D6 | BB_E8 | BB_E6 | BB_F8 | BB_F7 | BB_F6,	// 12 == E7
 	BB_E8 | BB_E7 | BB_E6 | BB_F8 | BB_F6 | BB_G8 | BB_G7 | BB_G6,	// 13 == F7
 	BB_F8 | BB_F7 | BB_F6 | BB_G8 | BB_G6 | BB_H8 | BB_H7 | BB_H6,	// 14 == G7
-	BB_G8 | BB_G7 | BB_G6 | BB_H8 | BB_H6,													// 15 == H7
-	BB_B7 | BB_B6 | BB_B5 | BB_A7 | BB_A5,													// 16 == A6
+	BB_G8 | BB_G7 | BB_G6 | BB_H8 | BB_H6,							// 15 == H7
+	BB_B7 | BB_B6 | BB_B5 | BB_A7 | BB_A5,							// 16 == A6
 	BB_A7 | BB_A6 | BB_A5 | BB_B7 | BB_B5 | BB_C7 | BB_C6 | BB_C5,	// 17 == B6
 	BB_B7 | BB_B6 | BB_B5 | BB_C7 | BB_C5 | BB_D7 | BB_D6 | BB_D5,	// 18 == C6
 	BB_C7 | BB_C6 | BB_C5 | BB_D7 | BB_D5 | BB_E7 | BB_E6 | BB_E5,	// 19 == D6
 	BB_D7 | BB_D6 | BB_D5 | BB_E7 | BB_E5 | BB_F7 | BB_F6 | BB_F5,	// 20 == E6
 	BB_E7 | BB_E6 | BB_E5 | BB_F7 | BB_F5 | BB_G7 | BB_G6 | BB_G5,	// 21 == F6
 	BB_F7 | BB_F6 | BB_F5 | BB_G7 | BB_G5 | BB_H7 | BB_H6 | BB_H5,	// 22 == G6
-	BB_G7 | BB_G6 | BB_G5 | BB_H7 | BB_H5,													// 23 == H6
-	BB_B6 | BB_B5 | BB_B4 | BB_A6 | BB_A4,													// 24 == A5
+	BB_G7 | BB_G6 | BB_G5 | BB_H7 | BB_H5,							// 23 == H6
+	BB_B6 | BB_B5 | BB_B4 | BB_A6 | BB_A4,							// 24 == A5
 	BB_A6 | BB_A5 | BB_A4 | BB_B6 | BB_B4 | BB_C6 | BB_C5 | BB_C4,	// 25 == B5
 	BB_B6 | BB_B5 | BB_B4 | BB_C6 | BB_C4 | BB_D6 | BB_D5 | BB_D4,	// 26 == C5
 	BB_C6 | BB_C5 | BB_C4 | BB_D6 | BB_D4 | BB_E6 | BB_E5 | BB_E4,	// 27 == D5
 	BB_D6 | BB_D5 | BB_D4 | BB_E6 | BB_E4 | BB_F6 | BB_F5 | BB_F4,	// 28 == E5
 	BB_E6 | BB_E5 | BB_E4 | BB_F6 | BB_F4 | BB_G6 | BB_G5 | BB_G4,	// 29 == F5
 	BB_F6 | BB_F5 | BB_F4 | BB_G6 | BB_G4 | BB_H6 | BB_H5 | BB_H4,	// 30 == G5
-	BB_G6 | BB_G5 | BB_G4 | BB_H6 | BB_H4,													// 31 == H5
-	BB_B5 | BB_B4 | BB_B3 | BB_A5 | BB_A3,													// 32 == A4
+	BB_G6 | BB_G5 | BB_G4 | BB_H6 | BB_H4,							// 31 == H5
+	BB_B5 | BB_B4 | BB_B3 | BB_A5 | BB_A3,							// 32 == A4
 	BB_A5 | BB_A4 | BB_A3 | BB_B5 | BB_B3 | BB_C5 | BB_C4 | BB_C3,	// 33 == B4
 	BB_B5 | BB_B4 | BB_B3 | BB_C5 | BB_C3 | BB_D5 | BB_D4 | BB_D3,	// 34 == C4
 	BB_C5 | BB_C4 | BB_C3 | BB_D5 | BB_D3 | BB_E5 | BB_E4 | BB_E3,	// 35 == D4
 	BB_D5 | BB_D4 | BB_D3 | BB_E5 | BB_E3 | BB_F5 | BB_F4 | BB_F3,	// 36 == E4
 	BB_E5 | BB_E4 | BB_E3 | BB_F5 | BB_F3 | BB_G5 | BB_G4 | BB_G3,	// 37 == F4
 	BB_F5 | BB_F4 | BB_F3 | BB_G5 | BB_G3 | BB_H5 | BB_H4 | BB_H3,	// 38 == G4
-	BB_G5 | BB_G4 | BB_G3 | BB_H5 | BB_H3,													// 39 == H4
-	BB_B4 | BB_B3 | BB_B2 | BB_A4 | BB_A2,													// 40 == A3
+	BB_G5 | BB_G4 | BB_G3 | BB_H5 | BB_H3,							// 39 == H4
+	BB_B4 | BB_B3 | BB_B2 | BB_A4 | BB_A2,							// 40 == A3
 	BB_A4 | BB_A3 | BB_A2 | BB_B4 | BB_B2 | BB_C4 | BB_C3 | BB_C2,	// 41 == B3
 	BB_B4 | BB_B3 | BB_B2 | BB_C4 | BB_C2 | BB_D4 | BB_D3 | BB_D2,	// 42 == C3
 	BB_C4 | BB_C3 | BB_C2 | BB_D4 | BB_D2 | BB_E4 | BB_E3 | BB_E2,	// 43 == D3
 	BB_D4 | BB_D3 | BB_D2 | BB_E4 | BB_E2 | BB_F4 | BB_F3 | BB_F2,	// 44 == E3
 	BB_E4 | BB_E3 | BB_E2 | BB_F4 | BB_F2 | BB_G4 | BB_G3 | BB_G2,	// 45 == F3
 	BB_F4 | BB_F3 | BB_F2 | BB_G4 | BB_G2 | BB_H4 | BB_H3 | BB_H2,	// 46 == G3
-	BB_G4 | BB_G3 | BB_G2 | BB_H4 | BB_H2,													// 47 == H3
-	BB_B3 | BB_B2 | BB_B1 | BB_A3 | BB_A1,													// 48 == A2
+	BB_G4 | BB_G3 | BB_G2 | BB_H4 | BB_H2,							// 47 == H3
+	BB_B3 | BB_B2 | BB_B1 | BB_A3 | BB_A1,							// 48 == A2
 	BB_A3 | BB_A2 | BB_A1 | BB_B3 | BB_B1 | BB_C3 | BB_C2 | BB_C1,	// 49 == B2
 	BB_B3 | BB_B2 | BB_B1 | BB_C3 | BB_C1 | BB_D3 | BB_D2 | BB_D1,	// 50 == C2
 	BB_C3 | BB_C2 | BB_C1 | BB_D3 | BB_D1 | BB_E3 | BB_E2 | BB_E1,	// 51 == D2
 	BB_D3 | BB_D2 | BB_D1 | BB_E3 | BB_E1 | BB_F3 | BB_F2 | BB_F1,	// 52 == E2
 	BB_E3 | BB_E2 | BB_E1 | BB_F3 | BB_F1 | BB_G3 | BB_G2 | BB_G1,	// 53 == F2
 	BB_F3 | BB_F2 | BB_F1 | BB_G3 | BB_G1 | BB_H3 | BB_H2 | BB_H1,	// 54 == G2
-	BB_G3 | BB_G2 | BB_G1 | BB_H3 | BB_H1,													// 55 == H2
-	BB_B2 | BB_B1 | BB_A2,																					// 56 == A1
-	BB_A2 | BB_A1 | BB_B2 | BB_C2 | BB_C1,													// 57 == B1
-	BB_B2 | BB_B1 | BB_C2 | BB_D2 | BB_D1,													// 58 == C1
-	BB_C2 | BB_C1 | BB_D2 | BB_E2 | BB_E1,													// 59 == D1
-	BB_D2 | BB_D1 | BB_E2 | BB_F2 | BB_F1,													// 60 == E1
-	BB_E2 | BB_E1 | BB_F2 | BB_G2 | BB_G1,													// 61 == F1
-	BB_F2 | BB_F1 | BB_G2 | BB_H2 | BB_H1,													// 62 == G1
-	BB_G2 | BB_G1 | BB_H2																						// 63 == H1
+	BB_G3 | BB_G2 | BB_G1 | BB_H3 | BB_H1,							// 55 == H2
+	BB_B2 | BB_B1 | BB_A2,											// 56 == A1
+	BB_A2 | BB_A1 | BB_B2 | BB_C2 | BB_C1,							// 57 == B1
+	BB_B2 | BB_B1 | BB_C2 | BB_D2 | BB_D1,							// 58 == C1
+	BB_C2 | BB_C1 | BB_D2 | BB_E2 | BB_E1,							// 59 == D1
+	BB_D2 | BB_D1 | BB_E2 | BB_F2 | BB_F1,							// 60 == E1
+	BB_E2 | BB_E1 | BB_F2 | BB_G2 | BB_G1,							// 61 == F1
+	BB_F2 | BB_F1 | BB_G2 | BB_H2 | BB_H1,							// 62 == G1
+	BB_G2 | BB_G1 | BB_H2											// 63 == H1
 };
 
 const UINT64 BB_ATAQUES_CABALLO[64] =
 {
-	BB_B6 | BB_C7,																									//  0 == A8
-	BB_A6 | BB_C6 | BB_D7,																					//  1 == B8
-	BB_A7 | BB_B6 | BB_D6 | BB_E7,																	//  2 == C8
-	BB_B7 | BB_C6 | BB_E6 | BB_F7,																	//  3 == D8
-	BB_C7 | BB_D6 | BB_F6 | BB_G7,																	//  4 == E8
-	BB_D7 | BB_E6 | BB_G6 | BB_H7,																	//  5 == F8
-	BB_E7 | BB_F6 | BB_H6,																					//  6 == G8
-	BB_F7 | BB_G6,																									//  7 == H8
-	BB_B5 | BB_C6 | BB_C8,																					//  8 == A7
-	BB_A5 | BB_C5 | BB_D6 | BB_D8,																	//  9 == B7
-	BB_A8 | BB_A6 | BB_B5 | BB_D5 | BB_E6 | BB_E8,									// 10 == C7
-	BB_B8 | BB_B6 | BB_C5 | BB_E5 | BB_F6 | BB_F8,									// 11 == D7
-	BB_C8 | BB_C6 | BB_D5 | BB_F5 | BB_G6 | BB_G8,									// 12 == E7
-	BB_D8 | BB_D6 | BB_E5 | BB_G5 | BB_H6 | BB_H8,									// 13 == F7
-	BB_E8 | BB_E6 | BB_F5 | BB_H5,																	// 14 == G7
-	BB_F8 | BB_F6 | BB_G5,																					// 15 == H7
-	BB_B8 | BB_B4 | BB_C5 | BB_C7,																	// 16 == A6
-	BB_A8 | BB_A4 | BB_C8 | BB_C4 | BB_D7 | BB_D5,									// 17 == B6
+	BB_B6 | BB_C7,													//  0 == A8
+	BB_A6 | BB_C6 | BB_D7,											//  1 == B8
+	BB_A7 | BB_B6 | BB_D6 | BB_E7,									//  2 == C8
+	BB_B7 | BB_C6 | BB_E6 | BB_F7,									//  3 == D8
+	BB_C7 | BB_D6 | BB_F6 | BB_G7,									//  4 == E8
+	BB_D7 | BB_E6 | BB_G6 | BB_H7,									//  5 == F8
+	BB_E7 | BB_F6 | BB_H6,											//  6 == G8
+	BB_F7 | BB_G6,													//  7 == H8
+	BB_B5 | BB_C6 | BB_C8,											//  8 == A7
+	BB_A5 | BB_C5 | BB_D6 | BB_D8,									//  9 == B7
+	BB_A8 | BB_A6 | BB_B5 | BB_D5 | BB_E6 | BB_E8,					// 10 == C7
+	BB_B8 | BB_B6 | BB_C5 | BB_E5 | BB_F6 | BB_F8,					// 11 == D7
+	BB_C8 | BB_C6 | BB_D5 | BB_F5 | BB_G6 | BB_G8,					// 12 == E7
+	BB_D8 | BB_D6 | BB_E5 | BB_G5 | BB_H6 | BB_H8,					// 13 == F7
+	BB_E8 | BB_E6 | BB_F5 | BB_H5,									// 14 == G7
+	BB_F8 | BB_F6 | BB_G5,											// 15 == H7
+	BB_B8 | BB_B4 | BB_C5 | BB_C7,									// 16 == A6
+	BB_A8 | BB_A4 | BB_C8 | BB_C4 | BB_D7 | BB_D5,					// 17 == B6
 	BB_A7 | BB_A5 | BB_B8 | BB_B4 | BB_D8 | BB_D4 | BB_E7 | BB_E5,	// 18 == C6
 	BB_B7 | BB_B5 | BB_C8 | BB_C4 | BB_E8 | BB_E4 | BB_F7 | BB_F5,	// 19 == D6
 	BB_C7 | BB_C5 | BB_D8 | BB_D4 | BB_F8 | BB_F4 | BB_G7 | BB_G5,	// 20 == E6
 	BB_D7 | BB_D5 | BB_E8 | BB_E4 | BB_G8 | BB_G4 | BB_H7 | BB_H5,	// 21 == F6
-	BB_E7 | BB_E5 | BB_F8 | BB_F4 | BB_H8 | BB_H4,									// 22 == G6
-	BB_F7 | BB_F5 | BB_G8 | BB_G4,																	// 23 == H6
-	BB_B7 | BB_B3 | BB_C4 | BB_C6,																	// 24 == A5
-	BB_A7 | BB_A3 | BB_C7 | BB_C3 | BB_D6 | BB_D4,									// 25 == B5
+	BB_E7 | BB_E5 | BB_F8 | BB_F4 | BB_H8 | BB_H4,					// 22 == G6
+	BB_F7 | BB_F5 | BB_G8 | BB_G4,									// 23 == H6
+	BB_B7 | BB_B3 | BB_C4 | BB_C6,									// 24 == A5
+	BB_A7 | BB_A3 | BB_C7 | BB_C3 | BB_D6 | BB_D4,					// 25 == B5
 	BB_A6 | BB_A4 | BB_B7 | BB_B3 | BB_D7 | BB_D3 | BB_E6 | BB_E4,	// 26 == C5
 	BB_B6 | BB_B4 | BB_C7 | BB_C3 | BB_E7 | BB_E3 | BB_F6 | BB_F4,	// 27 == D5
 	BB_C6 | BB_C4 | BB_D7 | BB_D3 | BB_F7 | BB_F3 | BB_G6 | BB_G4,	// 28 == E5
 	BB_D6 | BB_D4 | BB_E7 | BB_E3 | BB_G7 | BB_G3 | BB_H6 | BB_H4,	// 29 == F5
-	BB_E6 | BB_E4 | BB_F7 | BB_F3 | BB_H7 | BB_H3,									// 30 == G5
-	BB_F6 | BB_F4 | BB_G7 | BB_G3,																	// 31 == H5
-	BB_B6 | BB_B2 | BB_C3 | BB_C5,																	// 32 == A4
-	BB_A6 | BB_A2 | BB_C6 | BB_C2 | BB_D5 | BB_D3,									// 33 == B4
+	BB_E6 | BB_E4 | BB_F7 | BB_F3 | BB_H7 | BB_H3,					// 30 == G5
+	BB_F6 | BB_F4 | BB_G7 | BB_G3,									// 31 == H5
+	BB_B6 | BB_B2 | BB_C3 | BB_C5,									// 32 == A4
+	BB_A6 | BB_A2 | BB_C6 | BB_C2 | BB_D5 | BB_D3,					// 33 == B4
 	BB_A5 | BB_A3 | BB_B6 | BB_B2 | BB_D6 | BB_D2 | BB_E5 | BB_E3,	// 34 == C4
 	BB_B5 | BB_B3 | BB_C6 | BB_C2 | BB_E6 | BB_E2 | BB_F5 | BB_F3,	// 35 == D4
 	BB_C5 | BB_C3 | BB_D6 | BB_D2 | BB_F6 | BB_F2 | BB_G5 | BB_G3,	// 36 == E4
 	BB_D5 | BB_D3 | BB_E6 | BB_E2 | BB_G6 | BB_G2 | BB_H5 | BB_H3,	// 37 == F4
-	BB_E5 | BB_E3 | BB_F6 | BB_F2 | BB_H6 | BB_H2,									// 38 == G4
-	BB_F5 | BB_F3 | BB_G6 | BB_G2,																	// 39 == H4
-	BB_B5 | BB_B1 | BB_C2 | BB_C4,																	// 40 == A3
-	BB_A5 | BB_A1 | BB_C5 | BB_C1 | BB_D4 | BB_D2,									// 41 == B3
+	BB_E5 | BB_E3 | BB_F6 | BB_F2 | BB_H6 | BB_H2,					// 38 == G4
+	BB_F5 | BB_F3 | BB_G6 | BB_G2,									// 39 == H4
+	BB_B5 | BB_B1 | BB_C2 | BB_C4,									// 40 == A3
+	BB_A5 | BB_A1 | BB_C5 | BB_C1 | BB_D4 | BB_D2,					// 41 == B3
 	BB_A4 | BB_A2 | BB_B5 | BB_B1 | BB_D5 | BB_D1 | BB_E4 | BB_E2,	// 42 == C3
 	BB_B4 | BB_B2 | BB_C5 | BB_C1 | BB_E5 | BB_E1 | BB_F4 | BB_F2,	// 43 == D3
 	BB_C4 | BB_C2 | BB_D5 | BB_D1 | BB_F5 | BB_F1 | BB_G4 | BB_G2,	// 44 == E3
 	BB_D4 | BB_D2 | BB_E5 | BB_E1 | BB_G5 | BB_G1 | BB_H4 | BB_H2,	// 45 == F3
-	BB_E4 | BB_E2 | BB_F5 | BB_F1 | BB_H5 | BB_H1,									// 46 == G3
-	BB_F4 | BB_F2 | BB_G5 | BB_G1,																	// 47 == H3
-	BB_B4 | BB_C1 | BB_C3,																					// 48 == A2
-	BB_A4 | BB_C4 | BB_D3 | BB_D1,																	// 49 == B2
-	BB_A3 | BB_A1 | BB_B4 | BB_D4 |BB_E3 | BB_E1,										// 50 == C2
-	BB_B3 | BB_B1 | BB_C4 | BB_E4 |BB_F3 | BB_F1,										// 51 == D2
-	BB_C3 | BB_C1 | BB_D4 | BB_F4 |BB_G3 | BB_G1,										// 52 == E2
-	BB_D3 | BB_D1 | BB_E4 | BB_G4 |BB_H3 | BB_H1,										// 53 == F2
-	BB_E3 | BB_E1 | BB_F4 | BB_H4,																	// 54 == G2
-	BB_F3 | BB_F1 | BB_G4,																					// 55 == H2
-	BB_B3 | BB_C2,																									// 56 == A1
-	BB_A3 | BB_C3 | BB_D2,																					// 57 == B1
-	BB_A2 | BB_B3 | BB_D3 |BB_E2 ,																	// 58 == C1
-	BB_B2 | BB_C3 | BB_E3 |BB_F2 ,																	// 59 == D1
-	BB_C2 | BB_D3 | BB_F3 |BB_G2 ,																	// 60 == E1
-	BB_D2 | BB_E3 | BB_G3 |BB_H2 ,																	// 61 == F1
-	BB_E2 | BB_F3 | BB_H3,																					// 62 == G1
-	BB_F2 | BB_G3																										// 63 == H1
+	BB_E4 | BB_E2 | BB_F5 | BB_F1 | BB_H5 | BB_H1,					// 46 == G3
+	BB_F4 | BB_F2 | BB_G5 | BB_G1,									// 47 == H3
+	BB_B4 | BB_C1 | BB_C3,											// 48 == A2
+	BB_A4 | BB_C4 | BB_D3 | BB_D1,									// 49 == B2
+	BB_A3 | BB_A1 | BB_B4 | BB_D4 |BB_E3 | BB_E1,					// 50 == C2
+	BB_B3 | BB_B1 | BB_C4 | BB_E4 |BB_F3 | BB_F1,					// 51 == D2
+	BB_C3 | BB_C1 | BB_D4 | BB_F4 |BB_G3 | BB_G1,					// 52 == E2
+	BB_D3 | BB_D1 | BB_E4 | BB_G4 |BB_H3 | BB_H1,					// 53 == F2
+	BB_E3 | BB_E1 | BB_F4 | BB_H4,									// 54 == G2
+	BB_F3 | BB_F1 | BB_G4,											// 55 == H2
+	BB_B3 | BB_C2,													// 56 == A1
+	BB_A3 | BB_C3 | BB_D2,											// 57 == B1
+	BB_A2 | BB_B3 | BB_D3 |BB_E2 ,									// 58 == C1
+	BB_B2 | BB_C3 | BB_E3 |BB_F2 ,									// 59 == D1
+	BB_C2 | BB_D3 | BB_F3 |BB_G2 ,									// 60 == E1
+	BB_D2 | BB_E3 | BB_G3 |BB_H2 ,									// 61 == F1
+	BB_E2 | BB_F3 | BB_H3,											// 62 == G1
+	BB_F2 | BB_G3													// 63 == H1
 };
 
 const UINT64 BB_ATAQUES_ALFIL[64] =

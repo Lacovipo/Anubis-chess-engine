@@ -28,12 +28,7 @@
 	*	Recibe: Puntero a la posición actual			*
 	*													*
 	*	Devuelve: El balance material					*
-	*													*
-	*	Descripción: Cuenta el material. Sólo se usa	*
-	*				 al establecer una nueva posición	*
-	*				 (el material se actualiza de forma	*
-	*				 incremental)						*
-	*				 ¡OJO! Siempre es desde el punto de	*
+	*			  ¡OJO! Siempre es desde el punto de	*
 	*				 vista de las blancas				*
 	*													*
 	*****************************************************
@@ -135,7 +130,7 @@ SINT32 DeterminarAmenaza(TPosicion* pPos)
 		u32Casilla = BB_GetBitYQuitar(&u64Temp);
 		s32Amenaza = SEE_Amenaza(pPos, u32Casilla, VACIO);
 
-		// 07/03/25 0.73 Lo que viene es la nueva fórmula. Antes, simplemente, iba acumulando amenazas, sumándolas sin más
+		// Lo que viene es la nueva fórmula. Antes, simplemente, iba acumulando amenazas, sumándolas sin más
 		if (s32Amenaza > 0)
 		{
 			// Tenemos, al menos, una amenaza
@@ -173,7 +168,7 @@ SINT32 Evaluar(TPosicion* pPos)
 #if !defined(DEBUG_NNUE)
 	if (ConsultarHashEval(pPos))
 	{
-		// 0.79 Ajuste por cercanía al contador de tablas
+		// Ajuste por cercanía al contador de tablas
 		s32Eval = pPos->s32Eval;
 		s32Eval *= (200 - pPos->u8Cincuenta);
 		s32Eval /= 200;

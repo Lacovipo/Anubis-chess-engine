@@ -41,12 +41,9 @@ void __cdecl ImprimirALog(const char * szFmt, ...)
 #endif
 
 /*
- * Envía a la salida estándar una cadena en formato del GUI que nos esté soportando, es decir, protocolo Winboard
- *  o consola
+ * Envía a la salida estándar una cadena en formato del GUI que nos esté soportando, es decir, protocolo Winboard o consola
  * El tiempo lo calculamos aquí (tomamos el actual)
  * El número de nodos lo tomamos de dbDatosBusqueda
- * 30/01/25 0.60e Añado profundidad selectiva y pongo un tabulador antes de la pv como indica el protocolo wb
- *			Aunque estaba bien, según el protocolo, da problemas en Arena, así que lo dejo comentado y lo intento de otra manera
  *
  */
 void ImprimirCadenaGUI(SINT32 s32Prof, SINT32 s32Eval, char * szPV)

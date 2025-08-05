@@ -14,13 +14,6 @@
  *
  * Devuelve: Un entero con la variación de profundidad a aplicar
  *
- * Descripción: Revisa todas las posibles extensiones. En cuanto encuentra un motivo para extender, devuelve 1. Si
- *  llega hasta el final, devuelve cero
- *
- * Nota: No olvidar que tengo una copia casi literal de esta función en Inicio consola, que uso para recorrer de
- *  forma manual variantes observando el efecto de las extensiones y podas. Si toco algo aquí, debo también cambiarlo
- *  allí.
- *
  */
 /*
 	Idea: Hay ciertos criterios (amenazas, capturas cerca del rey, ataque) que no siempre justifican de por sí una

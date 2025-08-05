@@ -224,7 +224,7 @@ void InicioWB(int argc, char * argv[])
 					pPos++;
 					ComputarBB(pPos); // 01/08/25 3.01
 
-					as32PilaEvaluaciones[dbDatosBusqueda.u32NumPlyPartida] = INFINITO; // 23/01/25 0.60 para que la primera vez que piense tras el libro, sea larga
+					as32PilaEvaluaciones[dbDatosBusqueda.u32NumPlyPartida] = INFINITO; // para que la primera vez que piense tras el libro, sea larga
 
 					if (dbDatosBusqueda.u32ColorAnubis == Pos_GetTurno(pPos))
 					{
@@ -271,9 +271,9 @@ void InicioWB(int argc, char * argv[])
 							dbDatosBusqueda.eTipoBusqueda = TBU_PARTIDA;
 							dbDatosBusqueda.bOtroCicloPonder = TRUE;
 
-							// 19/01/25 0.59c Recalcular tiempos, porque justo antes de esta jugada ponder me ha venido el comando "time" con el nuevo tiempo exacto disponible
+							// Recalcular tiempos, porque justo antes de esta jugada ponder me ha venido el comando "time" con el nuevo tiempo exacto disponible
 							DeterminarTiempoBusqueda();
-							// 09/01/25 Quiero resetear el reloj porque arena, a veces, falla y no me manda el comando time, y quiero saber el tiempo exacto que me queda
+							// Quiero resetear el reloj porque arena, a veces, falla y no me manda el comando time, y quiero saber el tiempo exacto que me queda
 							PonerRelojEnMarcha(&g_tReloj);
 							#if (FICHERO_LOG == AV_LOG)
 								ImprimirALog("*DBG* Reloj puesto en marcha (ponder acertado)");
@@ -430,8 +430,7 @@ void InicioWB(int argc, char * argv[])
 			UINT32 u32Pong;
 
 			//
-			// Sincronización. Devolvemos el correspondiente pong sin
-			// molestar al motor
+			// Sincronización. Devolvemos el correspondiente pong sin molestar al motor
 			// IMPORTANTE: El protocolo especifica que todos los comandos
 			//	previos deben ser procesados antes de responder con el pong.
 			//	Dada la estructura de Anubis, esto está garantizado. En caso

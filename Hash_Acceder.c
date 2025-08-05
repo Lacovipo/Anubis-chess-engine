@@ -168,11 +168,6 @@ BOOL ConsultarHash(TPosicion* pPos, SINT32 s32Prof, SINT32 s32Alfa, SINT32 s32Be
  *
  * Recibe: Puntero a la posición actual, profundidad (draft), val, jugada a almacenar, alfa y beta (para saber si es FH of FL)
  *
- * Descripción: Primero intenta grabar en la de profundidad. Si lo consigue, vuelca el contenido anterior a las otras
- *  tablas. Si no, lo graba en la primera de siempre-reemplazar, volcando su contenido anterior a la segunda
- *  23/01/25 0.60 Variable bGrabarProf y cambio en las condiciones para grabar (con idea de conservar mejor la información buena)
- *  17/02/25 0.67 Cambio radicalmente el enfoque. Elimino los clusters y ahora funciono directamente con nodos consecutivos
- *
  */
 void GrabarHash(TPosicion * pPos,
                 SINT32 s32Prof,
@@ -199,7 +194,7 @@ void GrabarHash(TPosicion * pPos,
 	BOOL		bGrabar = FALSE;
 
 	//
-	// Primero, decido en cual de las 3 ranuras voy a grabar
+	// Primero, decido en cual de las ranuras voy a grabar
 	//
 	for (pNodo = pTablaHash; pNodo < pTablaHash + HASH_RANURAS; pNodo++)
 	{
@@ -488,100 +483,6 @@ BOOL ConsultarHashQSCJ(TPosicion * pPos, SINT32 s32Prof, SINT32 s32Alfa, SINT32 
 		return(FALSE);
 	} // if de la signature y el turno
 
-	return(FALSE);
-}
-#endif
-
-/*
-	*****************************************************************
-	*																*
-	*	GrabarHashQSCJ												*
-	*																*
-	*																*
-	*	Recibe: Puntero a la posición actual, profundidad (draft),	*
-	*			val, jugada a almacenar, alfa y beta				*
-	*																*
-	*	Descripción: Graba en la tabla hash de QSearchConJaques		*
-	*																*
-	*	Última modificación: 02/07/2003								*
-	*																*
-	*****************************************************************
-*/
-#if defined(QSJ_HASH)
-void GrabarHashQSCJ(TPosicion * pPos,
-					SINT32 s32Prof,
-					SINT32 s32Val,
-					TJugada jug,
-					SINT32 s32Alfa,
-					SINT32 s32Beta)
-{
-	TNodoHash		*	pNodo = &aHashQSCJ[pPos->u64HashSignature & u32TamHashQSCJ];
-
-	pNodo->u64HashSignature = pPos->u64HashSignature;
-	Hash_SetProf(pNodo,s32Prof);
-	Hash_SetTurno(pNodo,Pos_GetTurno(pPos));
-	if (s32Val > s32Alfa)
-	{
-		if (s32Val >= s32Beta)
-			// Cota inferior (LBound, FH)
-			Hash_SetLBound(pNodo);
-		else
-			// Valor exacto
-			Hash_SetExacto(pNodo);
-		pNodo->jug = jug;
-		Jug_SetVal(&(pNodo->jug),s32Val);
-	}
-	else
-	{
-		// Cota superior (UBound, FL)
-		Hash_SetUBound(pNodo);
-		pNodo->jug = JUGADA_NULA;
-		Jug_SetVal(&(pNodo->jug),s32Val);
-	}
-}
-#endif
-
-/*
- *
- * IntentarFailLow
- *
- *
- * Recibe: Clave hash que quermos comprobar, turno, la profundidad de búsqueda actual, alfa y beta
- *
- * Devuelve: TRUE si podemos fallar low, FALSE en caso contrario
- *
- * Descripción: Comprueba para el registro del cluster adecuado, las tres ranuras asignadas, una a prof-based y dos a siempre reemplazar.
- *				Si puede podar, devuelve TRUE. Es utilizado por ETC.
- *
- */
-#if defined(BUS_ETC)
-BOOL IntentarFailLow(UINT64 u64HashSignature, UINT8 u8Turno, SINT32 s32Prof, SINT32 s32Alfa)
-{
-	TClusterHash	*	pClusterHash = &aClusterHash[u64HashSignature & u32TamClusterHash];
-	TNodoHash		*	apNodos[3];
-	UINT32				i;
-
-	apNodos[0] = &(pClusterHash->hsProf);
-	apNodos[1] = &(pClusterHash->hsReem1);
-	apNodos[2] = &(pClusterHash->hsReem2);
-
-	for (i = 0; i < 3; i++)
-	{
-		if ((apNodos[i]->u64HashSignature == u64HashSignature) && (Hash_GetTurno(apNodos[i]) == u8Turno))
-		{
-			// Tenemos coincidencia de signature y turno, comprobamos la prof para ver si podemos podar directamente
-			if (s32Prof <= (SINT32)Hash_GetProf(apNodos[i]))
-			{
-				// La profundidad es buena, así que sólo queda comprobar la eval
-				if (Hash_GetEsExacto(apNodos[i]) || Hash_GetEsUBound(apNodos[i]))
-				{
-					// Sólo nos sirve si es menor o igual que alfa
-					if (Jug_GetVal(apNodos[i]->jug) <= s32Alfa)
-						return(TRUE);
-				}
-			}
-		}
-	}
 	return(FALSE);
 }
 #endif

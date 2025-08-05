@@ -10,8 +10,8 @@
  * DeterminarTiempoBusqueda
  *
  *
- * Descripción: Calcula los tiempos normal y extendido para la búsqueda. También incrementa los contadores adecuados, considerando que esta función es llamada siempre antes de iniciar una búsqueda.
- *	Inicialmente, los cálculos son como los de Averno
+ * Descripción: Calcula los tiempos normal y extendido para la búsqueda. También incrementa los contadores adecuados,
+ *  considerando que esta función es llamada siempre antes de iniciar una búsqueda.
  *
  */
 void DeterminarTiempoBusqueda(void)

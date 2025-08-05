@@ -24,7 +24,7 @@ SINT32 Reducciones(TPosicion * pPos,
 {
 	assert(!Pos_GetJaqueado(pPos));   // El movimiento no da jaque (o habría sido extendido)
 
-	SINT32 s32Red = 0; // 24/02/25 0.69 para permitir acumular reducciones (si no, con la LMR ya no se miran las demás aunque se activen)
+	SINT32 s32Red = 0; // para permitir acumular reducciones (si no, con la LMR ya no se miran las demás aunque se activen)
 
 	//
 	// Condiciones de "no reducción"
@@ -35,7 +35,7 @@ SINT32 Reducciones(TPosicion * pPos,
 		return(0);
 	if (u32Legales < 3)									// No reduzco las 2 primeras jugadas
 		return(0);
-	if (Jug_GetPromo(jug))								// 23/01/25 0.60 No reduzco promociones
+	if (Jug_GetPromo(jug))								// No reduzco promociones
 		return(0);
 	#if defined(BUS_RED_LEGALES_X_PROF)
 		if (u32Legales < s32Prof)						// 0.81 - para que vayan apareciendo más jugadas conforme aumenta la profundidad

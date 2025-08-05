@@ -14,10 +14,6 @@
  *
  * Devuelve: TRUE si es jaque mate, FALSE en caso contrario
  *
- * Descripción: Realiza las siguientes comprobaciones:
- *	- Es jaque
- *	- Si hay un sólo jaqueador -> me lo como (OJO: ¿esto qué tontería es?)
- *
  */
 static BOOL EstoyMate(TPosicion * pPos)
 {
@@ -410,13 +406,6 @@ otra_whileN: ;
  *
  * QSearch
  *
- *
- * Recibe: Puntero a la posición actual, alfa y beta, ply actual
- *
- * Devuelve: El valor QSearch del nodo analizado
- *
- * Descripción: Realiza una búsqueda normal de capturas, ordenádolas según su valor SEE
- *
  */
 SINT32 QSearch(TPosicion * pPos, SINT32 s32Alfa, SINT32 s32Beta, SINT32 s32Ply)
 {
@@ -427,7 +416,7 @@ SINT32 QSearch(TPosicion * pPos, SINT32 s32Alfa, SINT32 s32Beta, SINT32 s32Ply)
 	SINT32		s32Mejor;
 	SINT32		s32AlfaOriginal = s32Alfa;
 
-	// 30/01/25 0.60e Profundidad selectiva
+	// Profundidad selectiva
 	if (s32Ply > dbDatosBusqueda.s32ProfSel)
 		dbDatosBusqueda.s32ProfSel = s32Ply;
 
