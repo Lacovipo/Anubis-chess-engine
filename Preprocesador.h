@@ -43,7 +43,6 @@
 //			IIR: jugar con la prof de corte (ahora mismo >= 4 a piñón)
 //			En AlfaBeta, cuando estoy en excluded move, ya no necesito evaluar porque esa posición ya la he evaluado antes de esta llamada ¿no?
 //			Idea: ver código de extensión singular en Alfabeta
-//			Implementar tabla de refutación (hablado con Gemini), como refuta[desde][hasta] = jugada que hace fail high (desde, hasta es la jugada anterior, que está en pPos->pListaJug-1)
 // 
 //			3.01_:
 //				Bus_EvalRepe() cambio el módulo a 2, para que sólo pueda ser 0 o -1 (no 1 como ahora, que hago módulo 3)
@@ -51,26 +50,28 @@
 //				Y otro bug en JugadaCorrecta, que he incluído al arreglar el anterior
 //				Reinicio los tests
 //
-//			3.01a:	(-8)
+//			3.01a:	(-9)
 //				1, 100 100 9, 250 100 9
 //
-//			3.01b:	(-15)
+//			3.01b:	(-1)
 //				1, 100 100 9, 250 100 8
 //
-//			3.01c:	(-1)
+//			3.01c:	(-7)
 //				1, 100 100 9, 250 100 7
 //
-//			3.01d:	(-17)
+//			3.01d:	(-7)
 //				1, 100 100 9, 250 100 11
 //
-//			3.01e:	(-3)
+//			3.01e:	(3)
 //				1, 100 100 9, 250 100 12
 //
-// 			3.01f:
+// 			3.01f:	(-9)
 //				1, 100 100 9, 250 100 6
 //
-// 			3.01g:
+// 			3.01g:	(-3)
 //				1, 100 100 9, 250 100 13
+// 
+//			Me quedo con la e
 //
 /////////////////////////////////////////////////
 
@@ -83,11 +84,11 @@
 //#define DEBUG_NNUE
 //#define MODO_PARAM
 
-//#define AVX2
-#define AVX512
+#define AVX2
+//#define AVX512
 
 #if defined(VERS_301)
-	#define VERSION "Anubis v3.01_"
+	#define VERSION "Anubis v3.01"
 	#define NOMBRE_LOG "An_3.01_"
 
 
@@ -146,30 +147,31 @@
 	// 1, 100 100 10, 250 100 10			//																	  -39	   .
 	// 1, 100 100 11, 250 100 10			//																	  -25	   .
 	// 1, 100 100 12, 250 100 10			//																	  -25	   .
-	// 1, 100 100 9, 250 100 6				//f																			   .
-	// 1, 100 100 9, 250 100 7				//c																			  -1
-	// 1, 100 100 9, 250 100 8				//b																			 -15
-	// 1, 100 100 9, 250 100 9				//a																			  -8
-	// 1, 100 100 9, 250 100 11				//d																			 -17
-	// 1, 100 100 9, 250 100 12				//e																			  -3
+	// 1, 100 100 9, 250 100 6				//f																			  -8
+	// 1, 100 100 9, 250 100 7				//c																			  -7
+	// 1, 100 100 9, 250 100 8				//b																			  -1
+	// 1, 100 100 9, 250 100 9				//a																			  -9
+	// 1, 100 100 9, 250 100 11				//d																			  -7
+	// 1, 100 100 9, 250 100 12				//e																			  3 x
+	// 1, 100 100 9, 250 100 13				//g																			  -3
 
 	#define REFUTACION						//																		7	   x
 
-	//#define QS_PODA_DELTA 1000			//									 +17							   .
-	#define QS_PODA_DELTA 1050				//									 +48							   x
-	//#define QS_PODA_DELTA 1100			//									 +28							   .
-	#define QS_PODA_FUTIL 300				//																	   x
-	#define QS_PODA_SEE_NEGATIVO			//																	   x
-	#define QS_PROF_JAQUES 2				//																	   x
-	//#define QS_STANDPAT_AUM 5				//																	   .	// Stand pat aumentado. Idea tomada de Ippolit
-	//#define RED_SOSEZ 10					//																	   .
-	//#define RED_SOSEZ 15					//																	   .
-	//#define RED_FH						//																	   .
+	//#define QS_PODA_DELTA 1000			//									 +17									   .
+	#define QS_PODA_DELTA 1050				//									 +48									   x
+	//#define QS_PODA_DELTA 1100			//									 +28									   .
+	#define QS_PODA_FUTIL 300				//																			   x
+	#define QS_PODA_SEE_NEGATIVO			//																			   x
+	#define QS_PROF_JAQUES 2				//																			   x
+	//#define QS_STANDPAT_AUM 5				//																			   .	// Stand pat aumentado. Idea tomada de Ippolit
+	//#define RED_SOSEZ 10					//																			   .
+	//#define RED_SOSEZ 15					//																			   .
+	//#define RED_FH						//																			   .
 
-	//#define PER_EXTDOBLE1SOLOESCAPE		//																	   .
-	#define PER_PODARJAQUESSEENEGATIVO		//																	   x	// Sólo con QS_PROF_JAQUES activada
-	#define PER_PODARJAQUESPOSPERDIDA		//																	   x	// Sólo con QS_PROF_JAQUES activada
-	#define PER_MEMORIAHASH 350				//																	   x
+	//#define PER_EXTDOBLE1SOLOESCAPE		//																			   .
+	#define PER_PODARJAQUESSEENEGATIVO		//																			   x	// Sólo con QS_PROF_JAQUES activada
+	#define PER_PODARJAQUESPOSPERDIDA		//																			   x	// Sólo con QS_PROF_JAQUES activada
+	#define PER_MEMORIAHASH 350				//																			   x
 
 	//#define QS_COMPROBAR_PROGRESO_JAQUES
 	//#define QS_INTENTAR_MATES_EN_QSNORMAL
