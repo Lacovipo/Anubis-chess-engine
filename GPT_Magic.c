@@ -1,12 +1,18 @@
 // MagicBitboards.c
 #include "GPT_Magic.h"
-#include <immintrin.h>  // Para pext y tzcnt
+#if defined(__AVX2__) 
+    #include <immintrin.h>  // Para pext y tzcnt
+#endif
 #include <string.h>
 #include <assert.h>
 #include <stdlib.h>
 #include "Tipos.h"
 #include "Constantes.h"
-#include <intrin.h>
+#if defined(_MSC_VER)
+    #if defined(__AVX2__) 
+        #include <intrin.h>
+    #endif
+#endif
 #include "Bitboards_inline.h"
 #include "Inline.h"
 
@@ -51,10 +57,18 @@ int GenerarMovimientosDeslizantes(TPosicion* pPos, TJugada* pJugada, BOOL bCaptu
         u64Piezas = pPos->u64TorresB | pPos->u64DamasB;
         while (u64Piezas)
         {
-            UINT32 bitIdx = _tzcnt_u64(u64Piezas);
+            #ifdef _MSC_VER
+                UINT32 bitIdx = _tzcnt_u64(u64Piezas);
+            #else
+                UINT32 bitIdx = __builtin_ctzll(u64Piezas);
+            #endif
             u32Desde = 63 - bitIdx;
             assert(PiezaEnCasilla(pPos, u32Desde) == TB || PiezaEnCasilla(pPos, u32Desde) == DB);
-            u64Piezas = _blsr_u64(u64Piezas);
+            #ifdef SOFT_INTRINSICS
+                u64Piezas = my_blsr_u64(u64Piezas);
+            #else
+                u64Piezas = _blsr_u64(u64Piezas);
+            #endif
             u64Destinos = GetRookAttacks(bitIdx, u64Todas) & ~pPos->u64TodasB;
             if (bCapturas)
                 u64Destinos &= pPos->u64TodasN;
@@ -62,8 +76,22 @@ int GenerarMovimientosDeslizantes(TPosicion* pPos, TJugada* pJugada, BOOL bCaptu
                 u64Destinos &= ~pPos->u64TodasN;
             while (u64Destinos)
             {
-                u32Hasta = 63 - _tzcnt_u64(u64Destinos);
-                u64Destinos = _blsr_u64(u64Destinos);
+                #ifdef _MSC_VER
+                    u32Hasta = 63 - _tzcnt_u64(u64Destinos);
+                    #ifdef SOFT_INTRINSICS
+                        u64Destinos = my_blsr_u64(u64Destinos);
+                    #else
+                        u64Destinos = _blsr_u64(u64Destinos);
+                    #endif
+                #else
+                    u32Hasta = 63 - __builtin_ctzll(u64Destinos);
+                    #ifdef SOFT_INTRINSICS
+                        u64Destinos = my_blsr_u64(u64Destinos);
+                    #else
+                        u64Destinos = _blsr_u64(u64Destinos);
+                    #endif
+                #endif
+
                 Jug_SetMovConHistoria(pJugada++, u32Desde, u32Hasta, 0);
                 iCuenta++;
             }
@@ -71,10 +99,18 @@ int GenerarMovimientosDeslizantes(TPosicion* pPos, TJugada* pJugada, BOOL bCaptu
         u64Piezas = pPos->u64AlfilesB | pPos->u64DamasB;
         while (u64Piezas)
         {
-            UINT32 bitIdx = _tzcnt_u64(u64Piezas);
+            #ifdef _MSC_VER
+                UINT32 bitIdx = _tzcnt_u64(u64Piezas);
+            #else
+                UINT32 bitIdx = __builtin_ctzll(u64Piezas);
+            #endif
             u32Desde = 63 - bitIdx;
             assert(PiezaEnCasilla(pPos, u32Desde) == AB || PiezaEnCasilla(pPos, u32Desde) == DB);
-            u64Piezas = _blsr_u64(u64Piezas);
+            #ifdef SOFT_INTRINSICS
+                u64Piezas = my_blsr_u64(u64Piezas);
+            #else
+                u64Piezas = _blsr_u64(u64Piezas);
+            #endif
             u64Destinos = GetBishopAttacks(bitIdx, u64Todas) & ~pPos->u64TodasB;
             if (bCapturas)
                 u64Destinos &= pPos->u64TodasN;
@@ -82,8 +118,16 @@ int GenerarMovimientosDeslizantes(TPosicion* pPos, TJugada* pJugada, BOOL bCaptu
                 u64Destinos &= ~pPos->u64TodasN;
             while (u64Destinos)
             {
-                u32Hasta = 63 - _tzcnt_u64(u64Destinos);
-                u64Destinos = _blsr_u64(u64Destinos);
+                #ifdef _MSC_VER
+                    u32Hasta = 63 - _tzcnt_u64(u64Destinos);
+                #else
+                    u32Hasta = 63 - __builtin_ctzll(u64Destinos);
+                #endif
+                #ifdef SOFT_INTRINSICS
+                    u64Destinos = my_blsr_u64(u64Destinos);
+                #else
+                    u64Destinos = _blsr_u64(u64Destinos);
+                #endif
                 Jug_SetMovConHistoria(pJugada++, u32Desde, u32Hasta, 0);
                 iCuenta++;
             }
@@ -94,10 +138,18 @@ int GenerarMovimientosDeslizantes(TPosicion* pPos, TJugada* pJugada, BOOL bCaptu
         u64Piezas = pPos->u64TorresN | pPos->u64DamasN;
         while (u64Piezas)
         {
-            UINT32 bitIdx = _tzcnt_u64(u64Piezas);
+            #ifdef _MSC_VER
+                UINT32 bitIdx = _tzcnt_u64(u64Piezas);
+            #else
+                UINT32 bitIdx = __builtin_ctzll(u64Piezas);
+            #endif
             u32Desde = 63 - bitIdx;
             assert(PiezaEnCasilla(pPos, u32Desde) == TN || PiezaEnCasilla(pPos, u32Desde) == DN);
-            u64Piezas = _blsr_u64(u64Piezas);
+            #ifdef SOFT_INTRINSICS
+                u64Piezas = my_blsr_u64(u64Piezas);
+            #else
+                u64Piezas = _blsr_u64(u64Piezas);
+            #endif
             u64Destinos = GetRookAttacks(bitIdx, u64Todas) & ~pPos->u64TodasN;
             if (bCapturas)
                 u64Destinos &= pPos->u64TodasB;
@@ -105,8 +157,16 @@ int GenerarMovimientosDeslizantes(TPosicion* pPos, TJugada* pJugada, BOOL bCaptu
                 u64Destinos &= ~pPos->u64TodasB;
             while (u64Destinos)
             {
-                u32Hasta = 63 - _tzcnt_u64(u64Destinos);
-                u64Destinos = _blsr_u64(u64Destinos);
+                #ifdef _MSC_VER
+                    u32Hasta = 63 - _tzcnt_u64(u64Destinos);
+                #else
+                    u32Hasta = 63 - __builtin_ctzll(u64Destinos);
+                #endif
+                #ifdef SOFT_INTRINSICS
+                    u64Destinos = my_blsr_u64(u64Destinos);
+                #else
+                    u64Destinos = _blsr_u64(u64Destinos);
+                #endif
                 Jug_SetMovConHistoria(pJugada++, u32Desde, u32Hasta, 0);
                 iCuenta++;
             }
@@ -114,10 +174,18 @@ int GenerarMovimientosDeslizantes(TPosicion* pPos, TJugada* pJugada, BOOL bCaptu
         u64Piezas = pPos->u64AlfilesN | pPos->u64DamasN;
         while (u64Piezas)
         {
-            UINT32 bitIdx = _tzcnt_u64(u64Piezas);
+            #ifdef _MSC_VER
+                UINT32 bitIdx = _tzcnt_u64(u64Piezas);
+            #else
+                UINT32 bitIdx = __builtin_ctzll(u64Piezas);
+            #endif
             u32Desde = 63 - bitIdx;
             assert(PiezaEnCasilla(pPos, u32Desde) == AN || PiezaEnCasilla(pPos, u32Desde) == DN);
-            u64Piezas = _blsr_u64(u64Piezas);
+            #ifdef SOFT_INTRINSICS
+                u64Piezas = my_blsr_u64(u64Piezas);
+            #else
+                u64Piezas = _blsr_u64(u64Piezas);
+            #endif
             u64Destinos = GetBishopAttacks(bitIdx, u64Todas) & ~pPos->u64TodasN;
             if (bCapturas)
                 u64Destinos &= pPos->u64TodasB;
@@ -125,8 +193,16 @@ int GenerarMovimientosDeslizantes(TPosicion* pPos, TJugada* pJugada, BOOL bCaptu
                 u64Destinos &= ~pPos->u64TodasB;
             while (u64Destinos)
             {
-                u32Hasta = 63 - _tzcnt_u64(u64Destinos);
-                u64Destinos = _blsr_u64(u64Destinos);
+                #ifdef _MSC_VER
+                    u32Hasta = 63 - _tzcnt_u64(u64Destinos);
+                #else
+                    u32Hasta = 63 - __builtin_ctzll(u64Destinos);
+                #endif
+                #ifdef SOFT_INTRINSICS
+                    u64Destinos = my_blsr_u64(u64Destinos);
+                #else
+                    u64Destinos = _blsr_u64(u64Destinos);
+                #endif
                 Jug_SetMovConHistoria(pJugada++, u32Desde, u32Hasta, 0);
                 iCuenta++;
             }
@@ -143,8 +219,13 @@ void InitMagicBitboards(void)
         au64MaskRook[sq] = RookMask(sq);
         au64MaskBishop[sq] = BishopMask(sq);
 
-        int rookBits = __popcnt64(au64MaskRook[sq]);
-        int bishopBits = __popcnt64(au64MaskBishop[sq]);
+        #ifdef _MSC_VER
+            int rookBits = __popcnt64(au64MaskRook[sq]);
+            int bishopBits = __popcnt64(au64MaskBishop[sq]);
+        #else
+            int rookBits = __builtin_popcountll(au64MaskRook[sq]);
+            int bishopBits = __builtin_popcountll(au64MaskBishop[sq]);
+        #endif
 
         for (int i = 0; i < (1 << rookBits); ++i)
         {
@@ -273,7 +354,11 @@ static UINT64 BishopAttacksOnTheFly(int sq, UINT64 block)
 static UINT64 GenerateBlockers(int index, UINT64 mask)
 {
     UINT64 result = 0;
-    int bits = __popcnt64(mask);
+    #ifdef _MSC_VER
+        int bits = __popcnt64(mask);
+    #else
+        int bits = __builtin_popcountll(mask);
+    #endif
     int i = 0;
 
     for (int b = 0; b < 64 && i < bits; ++b)

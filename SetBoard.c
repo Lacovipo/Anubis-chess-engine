@@ -1,13 +1,7 @@
 /*
 	Anubis
 
-	Copyright José Carlos Martínez Galán
-	Todos los derechos reservados
-
-	-------------------------------------
-
-	Módulo de implementación la función de
-	inicialización del tablero
+	José Carlos Martínez Galán
 */
 
 #include "Preprocesador.h"

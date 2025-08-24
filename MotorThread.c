@@ -1,18 +1,18 @@
 /*
 	Anubis
 
-	Copyright José Carlos Martínez Galán
-	Todos los derechos reservados
-
-	-------------------------------------
-
-	Módulo de implementación de las funciones
-	que se encargan de la comuniciación con
-	el thread del motor
+	José Carlos Martínez Galán
 */
 
-#pragma warning(disable : 4115) // Warning en las librerías de Windows
-#include <windows.h>
+// Include pthread.h for portability and remove Windows.h
+#ifdef _MSC_VER
+	#pragma warning(disable : 4115) // Warning en las librerías de Windows
+	#include <windows.h>
+#else
+	#include <pthread.h>
+	#include <unistd.h> // For usleep/nanosleep
+	#include <time.h>   // For nanosleep
+#endif
 #include "Preprocesador.h"
 #include "Tipos.h"
 #include "Variables.h"
@@ -132,7 +132,8 @@ BOOL ProcesarComando(void)
 				bDetenerBusqueda = TRUE;
 				break;
 			default:
-				__assume(0);
+				UNREACHABLE();
+				break;
 		}
 
 		// 25/04/2012 - La siguiente instrucción no parece tener ningún sentido, salvo que recibamos un comando mientras
@@ -173,7 +174,8 @@ void EnviarComandoAMotor(UINT32 u32Codigo,TPosicion * u32Param1,UINT32 u32Param2
 	acmListaComandos[u32NuevoCom].u32Param1 = u32Param1;
 	acmListaComandos[u32NuevoCom].u32Param2 = u32Param2;
 	if (szParam != NULL)
-		strcpy_s(acmListaComandos[u32NuevoCom].szParam, 1023, szParam);
+		// Use strncpy for a safer, portable alternative to strcpy_s
+		strncpy((char*)acmListaComandos[u32NuevoCom].szParam, szParam, 1023);
 
 	u32UltComandoEnviado = u32NuevoCom;
 }
@@ -193,6 +195,7 @@ void EnviarComandoAMotor(UINT32 u32Codigo,TPosicion * u32Param1,UINT32 u32Param2
 	*																		*
 	*************************************************************************
 */
+#ifdef _MSC_VER
 UINT32 __stdcall MotorThread(void)
 {
 	#pragma warning (disable: 4127)
@@ -203,3 +206,18 @@ UINT32 __stdcall MotorThread(void)
 	}
 	#pragma warning (default: 4127)
 }
+#else
+// Change the function signature for pthreads compatibility
+void* MotorThread(void* arg)
+{
+#pragma warning (disable: 4127)
+	while (TRUE)
+	{
+		ProcesarComando();
+		// Use nanosleep for a portable, high-resolution sleep
+		nanosleep(&(struct timespec) { 0, 100000000 }, NULL);
+	}
+#pragma warning (default: 4127)
+	return NULL;
+}
+#endif

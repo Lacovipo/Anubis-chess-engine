@@ -1,15 +1,7 @@
 /*
 	Anubis
 
-	Copyright José Carlos Martínez Galán
-	Todos los derechos reservados
-
-	-------------------------------------
-
-	Módulo de implementación de la función
-	que computa una serie de bitboards últiles
-	para evaluación, poda, generación de
-	movimientos, etc.
+	José Carlos Martínez Galán
 */
 
 #include "Preprocesador.h"

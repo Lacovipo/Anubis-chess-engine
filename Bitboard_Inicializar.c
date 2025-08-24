@@ -1,13 +1,7 @@
 /*
 	Anubis
 
-	Copyright José Carlos Martínez Galán
-	Todos los derechos reservados
-
-	-------------------------------------
-
-	Módulo de implementación de funciones
-	de inicialización de bitboards
+	José Carlos Martínez Galán
 */
 
 #include "Preprocesador.h"

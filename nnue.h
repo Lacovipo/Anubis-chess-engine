@@ -3,13 +3,24 @@
 #include "Preprocesador.h"
 #include "Tipos.h"
 #include "Constantes.h"
-#include <immintrin.h>
+
+#if defined(__AVX2__) 
+#include <immintrin.h>  
+#endif
 
 // Alineación para AVX
-#if defined (AVX512)
-#define ALIGN_NNUE __declspec(align(64))
+#ifdef _MSC_VER
+    #if defined (AVX512)
+        #define ALIGN_NNUE __declspec(align(64))
+    #else
+        #define ALIGN_NNUE __declspec(align(32))
+    #endif
 #else
-#define ALIGN_NNUE __declspec(align(32))
+    #if defined(__AVX512F__)
+        #define ALIGN_NNUE __attribute__((aligned(64)))
+    #else
+        #define ALIGN_NNUE __attribute__((aligned(32)))
+    #endif
 #endif
 
 #define INPUT_SIZE 773
@@ -64,5 +75,14 @@ extern int nNumFeaturesActivas;
 #define FEAT_PIEZACASILLA(piece, sq) piece * 64 + sq
 
 void RecalcularFeatures(TPosicion * pPos);
-int nnue_evaluate(TPosicion* pPos, NNUEWeights* pnnue_weights);
+
+// Funciones para cargar los pesos de la red neuronal
 int load_weights(const char* filename, NNUEWeights* pnnue_weights);
+
+// Conditionally declare the memory-loading function for GCC
+#if defined(__GNUC__)
+    #include <stddef.h> // for size_t
+    int load_weights_from_memory(const unsigned char* data, size_t size, NNUEWeights* pnnue_weights);
+#endif
+
+int nnue_evaluate(TPosicion* pPos, NNUEWeights* pnnue_weights);

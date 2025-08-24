@@ -1,21 +1,17 @@
 /*
 	Anubis
 
-	Copyright José Carlos Martínez Galán
-	Todos los derechos reservados
-
-	-------------------------------------
-
-	Módulo de implementación de la función
-	main
+	José Carlos Martínez Galán
 */
 
 #include "Preprocesador.h"
 #include <stdio.h>
 #include "Funciones.h"
 
-void __cdecl main(int argc,char *argv[])
+int __cdecl main(int argc,char *argv[])
 {
+	setbuf(stdout, NULL);
+	setbuf(stdin, NULL);
 	setvbuf(stdout, NULL, _IONBF, 0);
 	setvbuf(stdin, NULL, _IONBF, 0);
 

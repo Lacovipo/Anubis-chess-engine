@@ -1,14 +1,7 @@
 /*
 	Anubis
 
-	Copyright José Carlos Martínez Galán
-	Todos los derechos reservados
-
-	-------------------------------------
-
-	Módulo de implementación de la función
-	de salida del programa, cerrando ficheros
-	y liberando memoria
+	José Carlos Martínez Galán
 */
 
 #include "Preprocesador.h"

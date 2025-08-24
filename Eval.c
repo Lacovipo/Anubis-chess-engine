@@ -1,13 +1,7 @@
 ﻿/*
 	Anubis
 
-	Copyright José Carlos Martínez Galán
-	Todos los derechos reservados
-
-	-------------------------------------
-
-	Módulo de implementación de las funciones
-	de evaluación
+	José Carlos Martínez Galán
 */
 
 #include "Preprocesador.h"

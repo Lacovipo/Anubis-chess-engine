@@ -1,14 +1,7 @@
 /*
 	Anubis
 
-	Copyright José Carlos Martínez Galán
-	Todos los derechos reservados
-
-	-------------------------------------
-
-	Módulo de implementación de las funciones
-	relacionadas con el envío de datos a la
-	pantalla (stdout)
+	José Carlos Martínez Galán
 */
 #include "Preprocesador.h"
 #include <stdarg.h>
@@ -22,7 +15,8 @@ void __cdecl ImprimirAPantalla(const char * szFmt, ...)
 	va_list	lpArgPtr;
 
 	va_start(lpArgPtr, szFmt);
-	vsprintf(aszBuf, szFmt, lpArgPtr);
+	// Changed vsprintf to vsnprintf to prevent buffer overflows
+	vsnprintf(aszBuf, sizeof(aszBuf), szFmt, lpArgPtr);
 	printf("%s\n", aszBuf);
 	fflush(stdout);
 }
@@ -34,7 +28,8 @@ void __cdecl ImprimirALog(const char * szFmt, ...)
 	va_list	lpArgPtr;
 
 	va_start(lpArgPtr, szFmt);
-	vsprintf(aszBuf, szFmt, lpArgPtr);
+	// Changed vsprintf to vsnprintf to prevent buffer overflows
+	vsnprintf(aszBuf, sizeof(aszBuf), szFmt, lpArgPtr);
 	fprintf(pFLog,"%s\n", aszBuf);
 	fflush(stdout);
 }

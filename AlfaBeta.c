@@ -6,7 +6,6 @@
 #include "Bitboards_inline.h"
 #include "nnue.h"
 
-// 0.80
 static BOOL Mejorando(TPosicion* pPos, SINT32 s32Ply)
 {
 	if (dbDatosBusqueda.u32NumPlyPartida + s32Ply < 4)
@@ -241,7 +240,7 @@ SINT32 AlfaBeta(TPosicion * pPos, SINT32 s32Alfa, SINT32 s32Beta, SINT32 s32Prof
 		//
 		#define PODA_HASH_PROF_DIF 1			// Máxima diferencia permitida de profundidad entre acutal y hash
 
-		#define PODA_HASH_BETA_BASE 100			// Diferencia base contra beta
+		#define PODA_HASH_BETA_BASE 175			// Diferencia base contra beta
 		#define PODA_HASH_BETA_MULT_DIF 100		// Multiplicador por cada diferencia de profundidad adicional en beta
 		#define PODA_HASH_BETA_MULT_PROF 9		// Multiplicador por cada profundidad adicional en beta
 
@@ -280,7 +279,7 @@ SINT32 AlfaBeta(TPosicion * pPos, SINT32 s32Alfa, SINT32 s32Beta, SINT32 s32Prof
 	//
 	if (pPos->u32MovExclu == 0 && pPos->u8NumPeonesB + pPos->u8NumPeonesN + pPos->u8NumPiezasB + pPos->u8NumPiezasN + 2 <= TB_LARGEST && pPos->u8Cincuenta == 0)
 	{
-		BOOL bTerminar = FALSE;	// 21/02/25 - Ordeno un poquito el código subsiguiente para permitir grabar hash
+		BOOL bTerminar = FALSE;
 		unsigned tbres = tb_probe_wdl(pPos->u64TodasB,
 			pPos->u64TodasN,
 			BB_Mask(pPos->u8PosReyB) | BB_Mask(pPos->u8PosReyN),
@@ -1000,7 +999,7 @@ SINT32 AlfaBetaPV(TPosicion * pPos, SINT32 s32Alfa, SINT32 s32Beta, SINT32 s32Pr
 				else if ((Pos_GetTurno(pPos) == BLANCAS && pPos->s32EvalMaterial < 0) || (Pos_GetTurno(pPos) == NEGRAS && pPos->s32EvalMaterial > 0))
 					s32Alfa--;
 			}
-			GrabarHash(pPos, MAX_PLIES, EvalToTT(s32Alfa, s32Ply), JUGADA_NULA, -INFINITO, +INFINITO); // 21/02/25 0.68a
+			GrabarHash(pPos, MAX_PLIES, EvalToTT(s32Alfa, s32Ply), JUGADA_NULA, -INFINITO, +INFINITO);
 			return(s32Alfa);
 		}
 	}

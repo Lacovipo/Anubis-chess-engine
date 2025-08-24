@@ -1,15 +1,7 @@
 /*
 	Anubis
 
-	Copyright José Carlos Martínez Galán
-	Todos los derechos reservados
-
-	-------------------------------------
-
-	Módulo de implementación de las funciones
-	de acceso / consulta a las tablas hash
-
-	Última modificación: 02/07/2003
+	José Carlos Martínez Galán
 */
 
 #include "Preprocesador.h"
@@ -417,72 +409,3 @@ void GrabarHashEvalSoloEval(TPosicion* pPos, SINT32 s32Eval)
 	if (pNodo->u64HashSignature == pPos->u64HashSignature && pNodo->u32Turno == Pos_GetTurno(pPos))
 		pNodo->s32Eval = s32Eval;	
 }
-
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-
-/*
- *
- * ConsultarHashQSCJ
- *
- *
- * Recibe: Un puntero a la posición actual, la profundidad de búsqueda actual, un puntero a un valor de poda, para el caso de poder
- *	podar, un puntero a jugada donde devolver la mejor jugada que encuentre
- *
- * Devuelve: TRUE si podemos podar, FALSE en caso contrario
- *
- * Descripción: Consulta la tabla hash de QSearchConJaques()
- *	Si puede podar, devuelve TRUE y pasa el valor (para que la función llamadora sepa si podamos por high o por	low. En caso contrario,
- *	intenta devolver una jugada razonable para intentar primero
- *
- */
-#if defined(QSJ_HASH)
-BOOL ConsultarHashQSCJ(TPosicion * pPos, SINT32 s32Prof, SINT32 s32Alfa, SINT32 s32Beta, SINT32 * ps32ValPoda, TJugada * pJug)
-{
-	TNodoHash * pNodo = &aHashQSCJ[pPos->u64HashSignature & u32TamHashQSCJ];
-
-	*pJug = JUGADA_NULA;
-
-	if ((pNodo->u64HashSignature == pPos->u64HashSignature) && (Hash_GetTurno(pNodo) == Pos_GetTurno(pPos)))
-	{
-		// Tenemos coincidencia de signature y turno, comprobamos la prof para ver si podemos podar directamente
-		if (s32Prof <= (SINT32)Hash_GetProf(pNodo))
-		{
-			// La profundidad es buena, así que sólo queda comprobar la eval
-			if (Hash_GetEsExacto(pNodo))
-			{
-				// Valor exacto: salimos
-				*ps32ValPoda = Jug_GetVal(pNodo->jug);
-				return(TRUE);
-			}
-			else if (Hash_GetEsUBound(pNodo))
-			{
-				// Cota superior: sólo nos sirve si es menor o igual que alfa
-				if (Jug_GetVal(pNodo->jug) <= s32Alfa)
-				{
-					*ps32ValPoda = Jug_GetVal(pNodo->jug);
-					return(TRUE);
-				}
-			}
-			else
-			{
-				// Cota inferior: sólo nos sirve si es mayor o igual que beta
-				if (Jug_GetVal(pNodo->jug) >= s32Beta)
-				{
-					assert(Hash_GetEsLBound(pNodo));
-					*ps32ValPoda = Jug_GetVal(pNodo->jug);
-					return(TRUE);
-				}
-			}
-		} // if (s32Prof <= Hash_GetProf(pNodo))
-
-		// Si llegamos hasta aquí es porque no podemos podar; devolvemos una jugada (sólo me interesa FH, es decir, LBound o Exacto)
-		if (Hash_GetEsLBound(pNodo) || Hash_GetEsExacto(pNodo))
-			Jug_SetMov(pJug, Jug_GetMov(pNodo->jug));
-		return(FALSE);
-	} // if de la signature y el turno
-
-	return(FALSE);
-}
-#endif

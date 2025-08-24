@@ -2,7 +2,11 @@
 #include "nnue.h"
 #include <math.h>
 #include <string.h>
-#include <immintrin.h>
+#ifdef __ANDROID__
+    #include <arm_neon.h>
+#else
+    #include <immintrin.h>
+#endif
 #include <ctype.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -124,6 +128,64 @@ void RecalcularFeatures(TPosicion * pPos)
         nFeaturesActivas[nNumFeaturesActivas++] = FEAT_ENROQUE_q;	// q
 }
 
+// Added new function to load weights from memory
+int load_weights_from_memory(const unsigned char* data, size_t size, NNUEWeights* pnnue_weights)
+{
+    size_t total_params = (INPUT_SIZE * HIDDEN1) + HIDDEN1 + (HIDDEN1 * HIDDEN2) + HIDDEN2 + (HIDDEN2 * OUTPUT_SIZE) + OUTPUT_SIZE;
+    if (size != total_params * sizeof(float))
+        return 0;
+
+    const float* weights = (const float*)data;
+
+    // Distribuimos los pesos en la estructura
+    const float* w = weights;
+    const float* b = w + (INPUT_SIZE * HIDDEN1);
+    const float* w2 = b + HIDDEN1;
+    const float* b2 = w2 + (HIDDEN1 * HIDDEN2);
+    const float* w3 = b2 + HIDDEN2;
+    const float* b3 = w3 + (HIDDEN2 * OUTPUT_SIZE);
+
+    // Copiamos los pesos a nuestra estructura
+    for (int i = 0; i < HIDDEN1; i++)
+    {
+        pnnue_weights->b1[i] = b[i];
+        for (int j = 0; j < INPUT_SIZE; j++)
+            pnnue_weights->W1[i][j] = w[i * INPUT_SIZE + j];
+    }
+    for (int i = 0; i < HIDDEN2; i++)
+    {
+        pnnue_weights->b2[i] = b2[i];
+        for (int j = 0; j < HIDDEN1; j++)
+            pnnue_weights->W2[i][j] = w2[i * HIDDEN1 + j];
+    }
+    pnnue_weights->b3[0] = b3[0];
+    for (int i = 0; i < HIDDEN2; i++)
+        pnnue_weights->W3[0][i] = w3[i];
+
+    // Transponer W1 y W2 para máxima eficiencia AVX
+    float (*W1_transposed)[HIDDEN1] = malloc(INPUT_SIZE * HIDDEN1 * sizeof(float));
+    for (int i = 0; i < HIDDEN1; i++)
+    {
+        for (int j = 0; j < INPUT_SIZE; j++)
+            W1_transposed[j][i] = w[i * INPUT_SIZE + j]; // Transponer
+    }
+    memcpy(pnnue_weights->W1, W1_transposed, INPUT_SIZE * HIDDEN1 * sizeof(float));
+    free(W1_transposed);
+
+    float (*W2_transposed)[HIDDEN2] = malloc(HIDDEN1 * HIDDEN2 * sizeof(float));
+    for (int i = 0; i < HIDDEN2; i++)
+    {
+        for (int j = 0; j < HIDDEN1; j++)
+        {
+            W2_transposed[j][i] = w2[i * HIDDEN1 + j];
+        }
+    }
+    memcpy(pnnue_weights->W2, W2_transposed, HIDDEN1 * HIDDEN2 * sizeof(float));
+    free(W2_transposed);
+
+    return 1;
+}
+
 int load_weights(const char* filename, NNUEWeights* pnnue_weights)
 {
     FILE* f = fopen(filename, "rb");
@@ -182,8 +244,10 @@ int load_weights(const char* filename, NNUEWeights* pnnue_weights)
     free(W1_transposed);
 
     float (*W2_transposed)[HIDDEN2] = malloc(HIDDEN1 * HIDDEN2 * sizeof(float));
-    for (int i = 0; i < HIDDEN2; i++) {
-        for (int j = 0; j < HIDDEN1; j++) {
+    for (int i = 0; i < HIDDEN2; i++)
+    {
+        for (int j = 0; j < HIDDEN1; j++)
+        {
             W2_transposed[j][i] = w2[i * HIDDEN1 + j];
         }
     }
@@ -230,15 +294,10 @@ static void capa1_avx(const int* features, int num_features, float* salida, floa
     {
         float sum = b1[i];
         int k = 0;
-        for (; k < num_features - 4; k += 4)
-        {
-            sum += W1[features[k] * HIDDEN1 + i]
-                + W1[features[k + 1] * HIDDEN1 + i]
-                + W1[features[k + 2] * HIDDEN1 + i]
-                + W1[features[k + 3] * HIDDEN1 + i];
-        }
         for (; k < num_features; k++)
+        {
             sum += W1[features[k] * HIDDEN1 + i];
+        }
         
         salida[i] = sum;
     }

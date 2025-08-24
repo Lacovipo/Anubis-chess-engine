@@ -1,13 +1,7 @@
 /*
 	Anubis
 
-	Copyright José Carlos Martínez Galán
-	Todos los derechos reservados
-
-	-------------------------------------
-
-	Módulo de implementación de las funciones
-	relacionadas con los ficheros log
+	José Carlos Martínez Galán
 */
 
 #include "Preprocesador.h"
@@ -29,8 +23,8 @@ void AbrirFicheroLog(void)
 	{
 		_itoa(i,szNum,10);
 		strcpy(szLog,NOMBRE_LOG);
-		strcat(szLog,szNum);
-		strcat(szLog,".log");
+		strncat(szLog,szNum,sizeof(szLog) - strlen(szLog) - 1);
+		strncat(szLog,".log",sizeof(szLog) - strlen(szLog) - 1);
 		if ((pFLog = fopen(szLog,"r")) == NULL)
 			break;
 		fclose(pFLog);

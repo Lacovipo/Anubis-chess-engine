@@ -1,12 +1,11 @@
 /*
 	Anubis
 
-	Copyright José Carlos Martínez Galán
-	Todos los derechos reservados
+	José Carlos Martínez Galán
 */
 
 #pragma once
-#if !defined(WIN64)
+#if !defined(WIN64) && !defined(__linux__)
 #define WIN64
 #endif
 #pragma warning(disable: 4996)
@@ -14,7 +13,7 @@
 
 /////////////////////////////////////////////////
 //
-#define VERS_301
+#define VERS_302
 //
 //		Pte:
 //			Poner PODA_JC como un número que sea la prof máxima a partir de la cual podemos podar (ahora mismo es 4 a piñón; podríamos probar 5, 6, ...) (Berserk usa 9)
@@ -44,34 +43,34 @@
 //			En AlfaBeta, cuando estoy en excluded move, ya no necesito evaluar porque esa posición ya la he evaluado antes de esta llamada ¿no?
 //			Idea: ver código de extensión singular en Alfabeta
 // 
-//			3.01_:
-//				Bus_EvalRepe() cambio el módulo a 2, para que sólo pueda ser 0 o -1 (no 1 como ahora, que hago módulo 3)
-//				Arreglo un bug en JugadaCorrecta relativo a las casillas atacadas en los enroques
-//				Y otro bug en JugadaCorrecta, que he incluído al arreglar el anterior
-//				Reinicio los tests
+//			3.02_:
+//				Implemento los cambios de Jim Ablett que, en principio, no se activan
 //
-//			3.01a:	(-9)
-//				1, 100 100 9, 250 100 9
+//			3.02a:	(12)
+//				1, 25 100 9, 250 100 13
 //
-//			3.01b:	(-1)
-//				1, 100 100 9, 250 100 8
+//			3.02b:	(10)
+//				1, 50 100 9, 250 100 13
 //
-//			3.01c:	(-7)
-//				1, 100 100 9, 250 100 7
+//			3.02c:	(1)
+//				1, 75 100 9, 250 100 13
 //
-//			3.01d:	(-7)
-//				1, 100 100 9, 250 100 11
+//			3.02d:	(11)
+//				1, 90 100 9, 250 100 13
 //
-//			3.01e:	(3)
-//				1, 100 100 9, 250 100 12
+//			3.02e:	(11)
+//				1, 125 100 9, 250 100 13
 //
-// 			3.01f:	(-9)
-//				1, 100 100 9, 250 100 6
+//			3.02f:	(8)
+//				1, 150 100 9, 250 100 13
 //
-// 			3.01g:	(-3)
-//				1, 100 100 9, 250 100 13
+//			3.02g:	(18)
+//				1, 175 100 9, 250 100 13
+//
+//			3.02h:	(5)
+//				1, 200 100 9, 250 100 13
 // 
-//			Me quedo con la e
+//			Me quedo con la g (el 13 final ha sido un error de compilación, y las pruebas se han hecho así, aunque yo querría haber dejado 12)
 //
 /////////////////////////////////////////////////
 
@@ -84,94 +83,107 @@
 //#define DEBUG_NNUE
 //#define MODO_PARAM
 
-#define AVX2
-//#define AVX512
+#ifdef _MSC_VER       
+	//#define AVX2
+	#define AVX512
+	//#define SOFT_INTRINSICS
+#endif
 
-#if defined(VERS_301)
-	#define VERSION "Anubis v3.01"
-	#define NOMBRE_LOG "An_3.01_"
+#if defined(VERS_302)
+	#define VERSION "Anubis v3.02"
+	#define NOMBRE_LOG "An_3.02_"
 
 
-											//	1.00	1.01	1.02	2.00	2.01	2.02	2.03	2.10	3.00	3.01
+											//	1.00	1.01	1.02	2.00	2.01	2.02	2.03	2.10	3.00	3.01	3.02
 											//--------------------------------------------------------------------------------------
-	#define AS_DELTA_FH_MULT 2				//																			   x	// Multiplicador de delta en fail high
-	//#define AS_DELTA_FL_MULT 2			//																			   .	// Multiplicador de delta en fail low
-	#define AS_DELTA_FL_MULT 3				//																			   x	// Multiplicador de delta en fail low
-	#define AS_DELTA_DIN_BASE 10			//			   8															   x	// El delta se recalcula en cada iteración a partir de la eval; el número determina la base del delta
-	#define AS_DELTA_DIN_DIVISOR 8			//			   8															   x	// Complementa al anterior (DIN es de dinámico)
-	//#define BUS_BORRAR_KILLERS			//																			   .
+	#define AS_DELTA_FH_MULT 2				//																					   x	// Multiplicador de delta en fail high
+	//#define AS_DELTA_FL_MULT 2			//																					   .	// Multiplicador de delta en fail low
+	#define AS_DELTA_FL_MULT 3				//																					   x	// Multiplicador de delta en fail low
+	#define AS_DELTA_DIN_BASE 10			//			   8																	   x	// El delta se recalcula en cada iteración a partir de la eval; el número determina la base del delta
+	#define AS_DELTA_DIN_DIVISOR 8			//			   8																	   x	// Complementa al anterior (DIN es de dinámico)
+	//#define BUS_BORRAR_KILLERS			//																					   .
 
-	#define BUS_IID							//																			   x
-	#define BUS_IIR_PV 1					//																			   x	// Reducir 1 ply en nodos PV
-	#define BUS_IIR_CUT 1					//																			   x	// Reducir 1 ply en nodos cut
-	//#define BUS_IIR_CUT 2					//													 -15					   .	// Respecto a BUS_IIR_CUT 1
-	#define BUS_IIR_ALL 1					//													 114					   x	// Respecto a quitarlo
-	//#define BUS_LMR 1						//																			   .
-	//#define BUS_LMR 2						//			  -5	 -28													   .	// Respecto a BUS_LMR 3
-	#define BUS_LMR 3						//																			   x	// BUS_LMR 2 + s32Prof >= 17 && (bEsCutNode || !bMejorando) && u32Legales >= (s32Prof + 5)
-	//#define BUS_LMR 4						//													 -53					   .	// Respecto a BUS_LMR 3
-	//#define BUS_RED_LEGALES_X_PROF		//																			   .	// En reducciones, limitar legales por prof
+	#define BUS_IID							//																					   x
+	#define BUS_IIR_PV 1					//																					   x	// Reducir 1 ply en nodos PV
+	#define BUS_IIR_CUT 1					//																					   x	// Reducir 1 ply en nodos cut
+	//#define BUS_IIR_CUT 2					//													 -15							   .	// Respecto a BUS_IIR_CUT 1
+	#define BUS_IIR_ALL 1					//													 114							   x	// Respecto a quitarlo
+	//#define BUS_LMR 1						//																					   .
+	//#define BUS_LMR 2						//			  -5	 -28															   .	// Respecto a BUS_LMR 3
+	#define BUS_LMR 3						//																					   x	// BUS_LMR 2 + s32Prof >= 17 && (bEsCutNode || !bMejorando) && u32Legales >= (s32Prof + 5)
+	//#define BUS_LMR 4						//													 -53							   .	// Respecto a BUS_LMR 3
+	//#define BUS_RED_LEGALES_X_PROF		//																					   .	// En reducciones, limitar legales por prof
 
-	//#define BUS_NM_ADAP 1					//																			   .	// 3 + prof / 5
-	//#define BUS_NM_ADAP 2					//																			   .	// 3 + prof / 3 + min
-	#define BUS_NM_ADAP 3					//																			   x	// 3 + prof / 3 + min + verif
-	//#define BUS_NM_NO_CREO_QUE_PUEDA_FH	//																			   .
+	//#define BUS_NM_ADAP 1					//																					   .	// 3 + prof / 5
+	//#define BUS_NM_ADAP 2					//																					   .	// 3 + prof / 3 + min
+	#define BUS_NM_ADAP 3					//																					   x	// 3 + prof / 3 + min + verif
+	//#define BUS_NM_NO_CREO_QUE_PUEDA_FH	//																					   .
 
-	//#define BUS_RAZOR_MARGEN 300			//							 -24											   .	// Respecto a BUS_RAZOR_MARGEN 400
-	//#define BUS_RAZOR_MARGEN 350			//							 -17											   .	// Respecto a BUS_RAZOR_MARGEN 400
-	#define BUS_RAZOR_MARGEN 400			//																			   x
-	//#define BUS_RAZOR_MARGEN 450			//							 -12											   .	// Respecto a BUS_RAZOR_MARGEN 400
-	//#define EXT_CAPT_CERCA				//																			   .
-	//#define EXT_FINAL						//					 -27													   .
-	//#define EXT_PEON_7					//					 -14													   .
-	//#define EXT_RECAPTURA					//					 -33													   .
-	//#define EXT_SINGULAR 500				//																			   .	// Diferencia para extensión singular doble
-	//#define EXT_SINGULAR 100				//			 -16	  13													   .	// Respecto a EXT_SINGULAR 500
-	#define EXT_SINGULAR 50					//					  33													   x	// Respecto a EXT_SINGULAR 500
-	//#define EXT_SINGULAR 25				//			 		   1													   .	// Respecto a EXT_SINGULAR 500
-	//#define HASH_NO_GRABAR_MATES			//																			   .
-	//#define HASH_RANURAS 3				//													 -40					   .	// Respecto a HASH_RANURAS 4
-	#define HASH_RANURAS 4					//																			   x
-	//#define HASH_RANURAS 5				//									 +43	 -25							   .	// Respecto a HASH_RANURAS 4
-	#define PODA_FUTIL						//																			   x
-	//#define PODA_JC 1						//																			   .
-	#define PODA_JC 2						//																			   x
-	//#define PODA_JC 3						//					 -47													   .	// Respecto a PODA_JC 2
-	//#define PODA_LMP						//					 -19							-118					   .
-	#define PODA_SEE_NEGATIVO 1				//																			   x
-	//#define PODA_SEE_NEGATIVO 2			//													-287					   .	// Respecto a PODA_SEE_NEGATIVO 1
+	//#define BUS_RAZOR_MARGEN 300			//							 -24													   .	// Respecto a BUS_RAZOR_MARGEN 400
+	//#define BUS_RAZOR_MARGEN 350			//							 -17													   .	// Respecto a BUS_RAZOR_MARGEN 400
+	#define BUS_RAZOR_MARGEN 400			//																					   x
+	//#define BUS_RAZOR_MARGEN 450			//							 -12													   .	// Respecto a BUS_RAZOR_MARGEN 400
+	//#define EXT_CAPT_CERCA				//																					   .
+	//#define EXT_FINAL						//					 -27															   .
+	//#define EXT_PEON_7					//					 -14															   .
+	//#define EXT_RECAPTURA					//					 -33															   .
+	//#define EXT_SINGULAR 500				//																					   .	// Diferencia para extensión singular doble
+	//#define EXT_SINGULAR 100				//			 -16	  13															   .	// Respecto a EXT_SINGULAR 500
+	#define EXT_SINGULAR 50					//					  33															   x	// Respecto a EXT_SINGULAR 500
+	//#define EXT_SINGULAR 25				//			 		   1															   .	// Respecto a EXT_SINGULAR 500
+	//#define HASH_NO_GRABAR_MATES			//																					   .
+	//#define HASH_RANURAS 3				//													 -40							   .	// Respecto a HASH_RANURAS 4
+	#define HASH_RANURAS 4					//																					   x
+	//#define HASH_RANURAS 5				//									 +43	 -25									   .	// Respecto a HASH_RANURAS 4
+	#define PODA_FUTIL						//																					   x
+	//#define PODA_JC 1						//																					   .
+	#define PODA_JC 2						//																					   x
+	//#define PODA_JC 3						//					 -47															   .	// Respecto a PODA_JC 2
+	//#define PODA_LMP						//					 -19							-118							   .
+	#define PODA_SEE_NEGATIVO 1				//																					   x
+	//#define PODA_SEE_NEGATIVO 2			//													-287							   .	// Respecto a PODA_SEE_NEGATIVO 1
 
-	// 1, 100 100 7, 250 100 10				//																	  -44	   .
-	// 1, 100 100 8, 250 100 10				//																	  -23	   .
-	// 1, 100 100 9, 250 100 10				//																			   x	// Ver PODA_HASH_PROF_DIF en AlfaBeta.c
-	// 1, 100 100 10, 250 100 10			//																	  -39	   .
-	// 1, 100 100 11, 250 100 10			//																	  -25	   .
-	// 1, 100 100 12, 250 100 10			//																	  -25	   .
-	// 1, 100 100 9, 250 100 6				//f																			  -8
-	// 1, 100 100 9, 250 100 7				//c																			  -7
-	// 1, 100 100 9, 250 100 8				//b																			  -1
-	// 1, 100 100 9, 250 100 9				//a																			  -9
-	// 1, 100 100 9, 250 100 11				//d																			  -7
-	// 1, 100 100 9, 250 100 12				//e																			  3 x
-	// 1, 100 100 9, 250 100 13				//g																			  -3
+	// 1, 100 100 7, 250 100 10				//																	  -44			   .
+	// 1, 100 100 8, 250 100 10				//																	  -23			   .
+	// 1, 100 100 9, 250 100 10				//																			  -3	   .	// Ver PODA_HASH_PROF_DIF en AlfaBeta.c
+	// 1, 100 100 10, 250 100 10			//																	  -39			   .
+	// 1, 100 100 11, 250 100 10			//																	  -25			   .
+	// 1, 100 100 12, 250 100 10			//																	  -25			   .
+	// 1, 100 100 9, 250 100 6				//																			  -11	   .
+	// 1, 100 100 9, 250 100 7				//																			  -10	   .
+	// 1, 100 100 9, 250 100 8				//																			  -3	   .
+	// 1, 100 100 9, 250 100 9				//																			  -12	   .
+	// 1, 100 100 9, 250 100 11				//																			  -10	   .
+	// 1, 100 100 9, 250 100 12				//																					   x
+	// 1, 100 100 9, 250 100 13				//																			  -6	   .
 
-	#define REFUTACION						//																		7	   x
+	// 1, 25 100 9, 250 100 13				//a																					  12
+	// 1, 50 100 9, 250 100 13				//b																					  10
+	// 1, 75 100 9, 250 100 13				//c																					   1
+	// 1, 90 100 9, 250 100 13				//d																					  11
 
-	//#define QS_PODA_DELTA 1000			//									 +17									   .
-	#define QS_PODA_DELTA 1050				//									 +48									   x
-	//#define QS_PODA_DELTA 1100			//									 +28									   .
-	#define QS_PODA_FUTIL 300				//																			   x
-	#define QS_PODA_SEE_NEGATIVO			//																			   x
-	#define QS_PROF_JAQUES 2				//																			   x
-	//#define QS_STANDPAT_AUM 5				//																			   .	// Stand pat aumentado. Idea tomada de Ippolit
-	//#define RED_SOSEZ 10					//																			   .
-	//#define RED_SOSEZ 15					//																			   .
-	//#define RED_FH						//																			   .
+	// 1, 125 100 9, 250 100 13				//e																					  11
+	// 1, 150 100 9, 250 100 13				//f																					   8
+	// 1, 175 100 9, 250 100 13				//g																					  18
+	// 1, 200 100 9, 250 100 13				//h																					   5
 
-	//#define PER_EXTDOBLE1SOLOESCAPE		//																			   .
-	#define PER_PODARJAQUESSEENEGATIVO		//																			   x	// Sólo con QS_PROF_JAQUES activada
-	#define PER_PODARJAQUESPOSPERDIDA		//																			   x	// Sólo con QS_PROF_JAQUES activada
-	#define PER_MEMORIAHASH 350				//																			   x
+	#define REFUTACION						//																		7			   x
+
+	//#define QS_PODA_DELTA 1000			//									 +17											   .
+	#define QS_PODA_DELTA 1050				//									 +48											   x
+	//#define QS_PODA_DELTA 1100			//									 +28											   .
+	#define QS_PODA_FUTIL 300				//																					   x
+	#define QS_PODA_SEE_NEGATIVO			//																					   x
+	#define QS_PROF_JAQUES 2				//																					   x
+	//#define QS_STANDPAT_AUM 5				//																					   .	// Stand pat aumentado. Idea tomada de Ippolit
+	//#define RED_SOSEZ 10					//																					   .
+	//#define RED_SOSEZ 15					//																					   .
+	//#define RED_FH						//																					   .
+
+	//#define PER_EXTDOBLE1SOLOESCAPE		//																					   .
+	#define PER_PODARJAQUESSEENEGATIVO		//																					   x	// Sólo con QS_PROF_JAQUES activada
+	#define PER_PODARJAQUESPOSPERDIDA		//																					   x	// Sólo con QS_PROF_JAQUES activada
+	#define PER_MEMORIAHASH 350				//																					   x
 
 	//#define QS_COMPROBAR_PROGRESO_JAQUES
 	//#define QS_INTENTAR_MATES_EN_QSNORMAL

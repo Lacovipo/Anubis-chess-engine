@@ -1,22 +1,21 @@
 /*
 	Anubis
 
-	Copyright José Carlos Martínez Galán
-	Todos los derechos reservados
-
-	-------------------------------------
-
-	Módulo de implementación de las tareas
-	a realizar en la inicialización del
-	programa que son particulares al modo
-	winboard, así como la comunicación con
-	la interfaz (este es el thread de E/S)
+	José Carlos Martínez Galán
 */
+
+#include <stdio.h>
+#include <string.h>
 
 #include "Preprocesador.h"
 
-#pragma warning(disable : 4115) // Warning en las librerías de Windows
-#include <windows.h>
+#ifdef _MSC_VER
+	#pragma warning(disable : 4115) // Warning en las librerías de Windows
+	#include <windows.h>
+#else
+	// Use pthreads for gnuc
+	#include <pthread.h>
+#endif
 #include "Tipos.h"
 #include "Constantes.h"
 #include "Variables.h"
@@ -26,13 +25,50 @@
 #include "nnue.h"
 #include "GPT_Magic.h"
 
+// Conditionally include the embedded NNUE files for GNUC
+#if defined(__GNUC__)
+#include "incbin.h" // added for embedded net - ja
+
+// Note: INCBIN creates arrays with names prefixed by "g"
+INCBIN(EmbeddedNNUE_T0, "net00005_T0.bin");
+INCBIN(EmbeddedNNUE_T1, "net00005_T1.bin");
+INCBIN(EmbeddedNNUE_T2, "net00005_T2.bin");
+INCBIN(EmbeddedNNUE_T3, "net00005_T3.bin");
+INCBIN(EmbeddedNNUE_T4, "net00005_T4.bin");
+INCBIN(EmbeddedNNUE_T5, "net00005_T5.bin");
+INCBIN(EmbeddedNNUE_T6, "net00005_T6.bin");
+INCBIN(EmbeddedNNUE_T7, "net00005_T7.bin");
+INCBIN(EmbeddedNNUE_T8, "net00005_T8.bin");
+INCBIN(EmbeddedNNUE_T9, "net00005_T9.bin");
+#endif
+
+// Portable alternative to gets_s
+char* portable_gets(char* buffer, int size) {
+	if (fgets(buffer, size, stdin)) {
+		// Find the newline character and replace it with a null terminator
+		char* newline = strchr(buffer, '\n');
+		if (newline) {
+			*newline = '\0';
+		}
+		return buffer;
+	}
+	return NULL;
+}
+
 void InicioWB(int argc, char * argv[])
 {
 	char		szComando[256];
 	UINT32		u32Protover = 0;
+#ifdef _MSC_VER
 	HANDLE		hMotor = NULL;	// handle al thread del motor
+#else
+	// Use pthread_t for the thread handle
+	pthread_t hMotor;	// handle al thread del motor
+#endif
 	TPosicion * pPos = aPilaPosiciones + 4; // Puntero a la posición actual SOBRE EL TABLERO
+#ifdef _MSC_VER
 	DWORD		dwMotor;
+#endif
 	BOOL		bChikkiInicializado = FALSE;
 
 	#if (FICHERO_LOG == AV_LOG)
@@ -41,8 +77,10 @@ void InicioWB(int argc, char * argv[])
 		ImprimirALog("(c) Jose Carlos Martinez Galan\n");
 	#endif
 
-	setvbuf(stdin, NULL, _IONBF, 0);
+	setbuf(stdout, NULL);
+	setbuf(stdin, NULL);
 	setvbuf(stdout, NULL, _IONBF, 0);
+	setvbuf(stdin, NULL, _IONBF, 0);
 
 	// Datos precomputados
 	InicializarDatosPrecomputados();
@@ -53,6 +91,30 @@ void InicioWB(int argc, char * argv[])
 		Salir();
 
 	// NNUE
+#if defined(__GNUC__)
+	// Load from memory for GNUC compilers
+	if (!load_weights_from_memory(gEmbeddedNNUE_T0Data, gEmbeddedNNUE_T0Size, &nnue_weights_T0))
+		Salir();
+	if (!load_weights_from_memory(gEmbeddedNNUE_T1Data, gEmbeddedNNUE_T1Size, &nnue_weights_T1))
+		Salir();
+	if (!load_weights_from_memory(gEmbeddedNNUE_T2Data, gEmbeddedNNUE_T2Size, &nnue_weights_T2))
+		Salir();
+	if (!load_weights_from_memory(gEmbeddedNNUE_T3Data, gEmbeddedNNUE_T3Size, &nnue_weights_T3))
+		Salir();
+	if (!load_weights_from_memory(gEmbeddedNNUE_T4Data, gEmbeddedNNUE_T4Size, &nnue_weights_T4))
+		Salir();
+	if (!load_weights_from_memory(gEmbeddedNNUE_T5Data, gEmbeddedNNUE_T5Size, &nnue_weights_T5))
+		Salir();
+	if (!load_weights_from_memory(gEmbeddedNNUE_T6Data, gEmbeddedNNUE_T6Size, &nnue_weights_T6))
+		Salir();
+	if (!load_weights_from_memory(gEmbeddedNNUE_T7Data, gEmbeddedNNUE_T7Size, &nnue_weights_T7))
+		Salir();
+	if (!load_weights_from_memory(gEmbeddedNNUE_T8Data, gEmbeddedNNUE_T8Size, &nnue_weights_T8))
+		Salir();
+	if (!load_weights_from_memory(gEmbeddedNNUE_T9Data, gEmbeddedNNUE_T9Size, &nnue_weights_T9))
+		Salir();
+#else
+	// Load from file for other compilers, like MSVC
 	if (!load_weights("net00005_T0.bin", &nnue_weights_T0))
 		Salir();
 	if (!load_weights("net00005_T1.bin", &nnue_weights_T1))
@@ -73,9 +135,8 @@ void InicioWB(int argc, char * argv[])
 		Salir();
 	if (!load_weights("net00005_T9.bin", &nnue_weights_T9))
 		Salir();
+#endif
 
-	//if (!nnue_cargar_pesos("net00004_TX.bin"))
-	//	Salir();
 	printf("#NNUE cargado\n");
 
 	// Magic
@@ -118,12 +179,21 @@ void InicioWB(int argc, char * argv[])
 
 	// Lanzar el thread del motor
 	ImprimirAPantalla("feature done=0");
+#ifdef _MSC_VER
 	hMotor = CreateThread((LPSECURITY_ATTRIBUTES)NULL,0,(LPTHREAD_START_ROUTINE)MotorThread,NULL,0,&dwMotor);
 	if (hMotor == NULL)
 	{
 		ImprimirAPantalla("telluser Error: No se puede cargar el motor");
 		Salir();
 	}
+#else
+	// Use pthread_create for portability
+	if (pthread_create(&hMotor, NULL, MotorThread, NULL) != 0)
+	{
+		ImprimirAPantalla("telluser Error: No se puede cargar el motor");
+		Salir();
+	}
+#endif
 
 	ImprimirAPantalla("feature ping=1 setboard=1 playother=1 san=0 usermove=1 time=1 draw=0 sigint=0 sigterm=0 reuse=0 analyze=1 myname=\"%s\" variants=\"normal\" colors=0 ics=1 name=1 pause=0 feature option=\"SyzygyPath - path c:\\ajedrez\\TB_syzygy\" done=1", VERSION);
 	#if (FICHERO_LOG == AV_LOG)
@@ -154,7 +224,7 @@ void InicioWB(int argc, char * argv[])
 		////////////////////////////////////////////////////////////////////
 		if (!strcmp(szComando, "option"))
 		{
-			gets_s(szComando, 255);
+			portable_gets(szComando, 255);
 			#if (FICHERO_LOG == AV_LOG)
 				ImprimirALog(" %s", szComando);
 			#endif
@@ -194,9 +264,19 @@ void InicioWB(int argc, char * argv[])
 		{
 			EnviarComandoAMotor(COM_STOP,0,0,NULL);
 			while (dbDatosBusqueda.eEstadoBusqueda != BUS_ESPERANDO)
-					Sleep(100);
+				#ifdef _MSC_VER
+				Sleep(100);
+				#else
+				// Use nanosleep for portable, high-resolution sleep
+				nanosleep(&(struct timespec) { 0, 100000000 }, NULL);
+				#endif
 			dbDatosBusqueda.u32ColorAnubis = !Pos_GetTurno(pPos);
 			// Si ponder está activo, ponerse a ponderar ahora
+			continue;
+		}
+		////////////////////////////////////////////////////////////////////
+		if (!strcmp(szComando, "random"))
+		{
 			continue;
 		}
 		////////////////////////////////////////////////////////////////////
@@ -241,7 +321,12 @@ void InicioWB(int argc, char * argv[])
 						//
 						EnviarComandoAMotor(COM_STOP,0,0,NULL);
 						while (dbDatosBusqueda.eEstadoBusqueda != BUS_ESPERANDO)
+							#ifdef _MSC_VER
 							Sleep(100);
+							#else
+							// Use nanosleep for portable, high-resolution sleep
+							nanosleep(&(struct timespec) { 0, 100000000 }, NULL);
+							#endif
 						pPos->pListaJug[0] = jug;
 						Mover(pPos,pPos->pListaJug);
 						pPos++;
@@ -293,7 +378,12 @@ void InicioWB(int argc, char * argv[])
 
 							EnviarComandoAMotor(COM_STOP,0,0,NULL);
 							while (dbDatosBusqueda.eEstadoBusqueda != BUS_ESPERANDO)
+								#ifdef _MSC_VER
 								Sleep(100);
+								#else
+								// Use nanosleep for portable, high-resolution sleep
+								nanosleep(&(struct timespec) { 0, 100000000 }, NULL);
+								#endif
 							pPos->pListaJug[0] = jug;
 							dbDatosBusqueda.jugJugadaPonder = JUGADA_NULA;
 							dbDatosBusqueda.eTipoBusqueda = TBU_PARTIDA;
@@ -328,7 +418,12 @@ void InicioWB(int argc, char * argv[])
 			// Paro la búsqueda y dejo al motor en estado de no pensar nada
 			EnviarComandoAMotor(COM_STOP,0,0,NULL);
 			while (dbDatosBusqueda.eEstadoBusqueda != BUS_ESPERANDO)
-					Sleep(100);
+				#ifdef _MSC_VER
+				Sleep(100);
+				#else
+				// Use nanosleep for portable, high-resolution sleep
+				nanosleep(&(struct timespec) { 0, 100000000 }, NULL);
+				#endif
 
 			dbDatosBusqueda.eEstadoBusqueda = BUS_NORMAL;
 			dbDatosBusqueda.eTipoBusqueda = TBU_PARTIDA;
@@ -453,7 +548,7 @@ void InicioWB(int argc, char * argv[])
 			//
 			// Nombre del oponente
 			//
-			gets_s(dpuDatos.szNombreOponente, 255);
+			portable_gets(dpuDatos.szNombreOponente, 255);
 			#if (FICHERO_LOG == AV_LOG)
 				ImprimirALog(" %s",dpuDatos.szNombreOponente);
 			#endif
@@ -530,7 +625,9 @@ void InicioWB(int argc, char * argv[])
 				g_tReloj.m_s32NumSegundosControl = 60 * atoi(szComando);
 			else
 			{
-				strcpy_s(sz, 255, &szComando[u32+1]);
+				// portable alternative to strcpy_s
+				strncpy(sz, &szComando[u32 + 1], 255);
+				sz[255] = '\0';
 				szComando[u32] = '\0';
 				g_tReloj.m_s32NumSegundosControl = 60 * atoi(szComando);
 				g_tReloj.m_s32NumSegundosControl += atoi(sz);
@@ -578,7 +675,12 @@ void InicioWB(int argc, char * argv[])
 			// Paro la búsqueda
 			EnviarComandoAMotor(COM_STOP,0,0,NULL);
 			while (dbDatosBusqueda.eEstadoBusqueda != BUS_ESPERANDO)
-					Sleep(100);
+				#ifdef _MSC_VER
+				Sleep(100);
+				#else
+				// Use nanosleep for portable, high-resolution sleep
+				nanosleep(&(struct timespec) { 0, 100000000 }, NULL);
+				#endif
 			// Pongo la posición inicial
 			SetBoard(aPilaPosiciones + 4,"rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
 			pPos = aPilaPosiciones + 4;
@@ -597,7 +699,12 @@ void InicioWB(int argc, char * argv[])
 		{
 			EnviarComandoAMotor(COM_STOP,0,0,NULL);
 			while (dbDatosBusqueda.eEstadoBusqueda != BUS_ESPERANDO)
-					Sleep(100);
+				#ifdef _MSC_VER
+				Sleep(100);
+				#else
+				// Use nanosleep for portable, high-resolution sleep
+				nanosleep(&(struct timespec) { 0, 100000000 }, NULL);
+				#endif
 
 			dbDatosBusqueda.eTipoBusqueda = TBU_ANALISIS;
 			dbDatosBusqueda.u32ColorAnubis = COLOR_INDEFINIDO;
@@ -613,7 +720,7 @@ void InicioWB(int argc, char * argv[])
 			dbDatosBusqueda.eTipoBusqueda = TBU_ANALISIS;
 			dbDatosBusqueda.u32ColorAnubis = COLOR_INDEFINIDO;
 
-			gets_s(szComando, 255);
+			portable_gets(szComando, 255);
 			#if (FICHERO_LOG == AV_LOG)
 				ImprimirALog(" %s",szComando);
 			#endif
@@ -647,15 +754,12 @@ void InicioWB(int argc, char * argv[])
 			//
 			// Comentario tras el final de una partida. Ignoro el resto de la línea
 			//
-			gets_s(szComando, 255);
+			portable_gets(szComando, 255);
 			continue;
 		}
 		////////////////////////////////////////////////////////////////////
 		if (!strcmp(szComando,"quit"))
 		{
-			// Guardar el libro antes de salir
-			// ...
-
 			// Paro la búsqueda, espero un tiempo prudencial y salgo
 			EnviarComandoAMotor(COM_STOP,0,0,NULL);
 			#if (FICHERO_LOG == AV_LOG)
@@ -663,7 +767,12 @@ void InicioWB(int argc, char * argv[])
 			#endif
 			// Esperamos a que se pare el motor
 			while (dbDatosBusqueda.eEstadoBusqueda != BUS_ESPERANDO)
+				#ifdef _MSC_VER
 				Sleep(100);
+				#else
+				// Use nanosleep for portable, high-resolution sleep
+				nanosleep(&(struct timespec) { 0, 100000000 }, NULL);
+				#endif
 			Salir();
 		}
 		////////////////////////////////////////////////////////////////////
@@ -695,7 +804,12 @@ void InicioWB(int argc, char * argv[])
 				EnviarComandoAMotor(COM_STOP,0,0,NULL);
 				// Esperamos a que se pare el motor
 				while (dbDatosBusqueda.eEstadoBusqueda != BUS_ESPERANDO)
+					#ifdef _MSC_VER
 					Sleep(100);
+					#else
+					// Use nanosleep for portable, high-resolution sleep
+					nanosleep(&(struct timespec) { 0, 100000000 }, NULL);
+					#endif
 				dbDatosBusqueda.eTipoBusqueda = TBU_PARTIDA;
 			}
 			continue;

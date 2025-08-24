@@ -11,7 +11,7 @@
 // EGTB (chikki)
 //
 extern int use_tb;
-int TBlargest;
+static int TBlargest;
 
 // Ataques
 extern UINT64	au64AtaquesTorre[64];
@@ -29,7 +29,7 @@ extern SINT32		as32PilaEvaluaciones[MAX_POSICIONES+4];	// Desde el punto de vist
 extern TJugada		aJugParaIID[MAX_PLIES];
 extern SINT32		as32Historia[64][64];
 #if defined(REFUTACION)
-UINT32				au32Refuta[15][64][15][64]; // [pieza][casilla][pieza][casilla]
+static UINT32		au32Refuta[15][64][15][64]; // [pieza][casilla][pieza][casilla]
 #endif
 
 // Bitboards

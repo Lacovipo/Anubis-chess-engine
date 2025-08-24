@@ -1,15 +1,7 @@
 /*
 	Anubis
 
-	Copyright José Carlos Martínez Galán
-	Todos los derechos reservados
-
-	-------------------------------------
-
-	Módulo de implementación de las funciones
-	relacionadas con conversiones desde y
-	hacia las distintas notaciones soportadas
-	(SAN, Algebraica)
+	José Carlos Martínez Galán
 */
 
 #include "Preprocesador.h"
@@ -100,9 +92,9 @@ void Jug2Algebraica(TJugada jug, char * szJugada)
 	static char * aszPieza[15] = {" ", "P", "N", "B", "R", "Q", "K", " ", " ", "P", "N", "B", "R", "Q", "K"};
 
 	if (Jug_GetPromo(jug))
-		sprintf(szJugada, "%s%s%s\0", aszCuadros[Jug_GetDesde(jug)], aszCuadros[Jug_GetHasta(jug)], aszPieza[Jug_GetPromo(jug)]);
+		snprintf(szJugada, 10, "%s%s%s", aszCuadros[Jug_GetDesde(jug)], aszCuadros[Jug_GetHasta(jug)], aszPieza[Jug_GetPromo(jug)]);
 	else
-		sprintf(szJugada,"%s%s\0", aszCuadros[Jug_GetDesde(jug)], aszCuadros[Jug_GetHasta(jug)]);
+		snprintf(szJugada, 10, "%s%s", aszCuadros[Jug_GetDesde(jug)], aszCuadros[Jug_GetHasta(jug)]);
 }
 
 /*
@@ -121,26 +113,26 @@ void Jug2SAN(TPosicion * pPos, TJugada jug, char * szJugada)
 	if (u32Pieza == PB || u32Pieza == PN)
 	{
 		if (MismaColumna(Jug_GetDesde(jug), Jug_GetHasta(jug)))
-			sprintf(szJugada, "%s\0", aszCuadros[Jug_GetHasta(jug)]);
+			snprintf(szJugada, 10, "%s", aszCuadros[Jug_GetHasta(jug)]);
 		else
-			sprintf(szJugada, "%c%s\0", aszCuadros[Jug_GetDesde(jug)][0], aszCuadros[Jug_GetHasta(jug)]);
+			snprintf(szJugada, 10, "%c%s", aszCuadros[Jug_GetDesde(jug)][0], aszCuadros[Jug_GetHasta(jug)]);
 
 		if (Jug_GetPromo(jug))
-			strcat(szJugada, aszPieza[Jug_GetPromo(jug)]);
+			strncat(szJugada, aszPieza[Jug_GetPromo(jug)], 10 - strlen(szJugada) - 1);
 	}
 	else
 	{
 		if ((u32Pieza == RB || u32Pieza == RN) && ((Jug_GetDesde(jug) == TAB_E1 && Jug_GetHasta(jug) == TAB_G1) || (Jug_GetDesde(jug) == TAB_E8 && Jug_GetHasta(jug) == TAB_G8)))
-			sprintf(szJugada, "0-0\0");
+			snprintf(szJugada, 10, "0-0");
 		else if ((u32Pieza == RB || u32Pieza == RN) && ((Jug_GetDesde(jug) == TAB_E1 && Jug_GetHasta(jug) == TAB_C1) || (Jug_GetDesde(jug) == TAB_E8 && Jug_GetHasta(jug) == TAB_C8)))
-				sprintf(szJugada, "0-0-0\0");
+				snprintf(szJugada, 10, "0-0-0");
 		else if (bEsCaptura)
-			sprintf(szJugada, "%sx%s\0", aszPieza[u32Pieza], aszCuadros[Jug_GetHasta(jug)]);
+			snprintf(szJugada, 10, "%sx%s", aszPieza[u32Pieza], aszCuadros[Jug_GetHasta(jug)]);
 		else
-			sprintf(szJugada, "%s%s\0", aszPieza[u32Pieza], aszCuadros[Jug_GetHasta(jug)]);
+			snprintf(szJugada, 10, "%s%s", aszPieza[u32Pieza], aszCuadros[Jug_GetHasta(jug)]);
 	}
 	if (Pos_GetJaqueado(pPos))
-		strcat(szJugada, "+");
+		strncat(szJugada, "+", 10 - strlen(szJugada) - 1);
 }
 
 /*
@@ -160,6 +152,7 @@ void ExtraerPVdeArray(TPosicion * pPos,char * szPV)
 	UINT32			  i, j;
 	TPosicion *       pPosTemp;
 	size_t			  len;
+	const size_t      MAX_PV_SIZE = 1024; // Assuming a reasonable maximum buffer size
 
 	aPos[0] = *pPos;
 	pPosTemp = &aPos[0];
@@ -178,11 +171,16 @@ void ExtraerPVdeArray(TPosicion * pPos,char * szPV)
 
 		pPosTemp++;
 		Jug2SAN(pPosTemp, dbDatosBusqueda.ajugPV[0][i], szJugada);
-		strcat(szPV, szJugada);
-		strcat(szPV," ");
+		len = strlen(szPV);
+		strncat(szPV, szJugada, MAX_PV_SIZE - len - 1);
+		len = strlen(szPV);
+		strncat(szPV, " ", MAX_PV_SIZE - len - 1);
 
 		if (Pos_GetTurno(pPosTemp) == BLANCAS)
-			strcat(szPV, ". ");
+		{
+			len = strlen(szPV);
+			strncat(szPV, ". ", MAX_PV_SIZE - len - 1);
+		}
 	}
 	len = strlen(szPV);
 	if (len >= 2)
@@ -190,7 +188,8 @@ void ExtraerPVdeArray(TPosicion * pPos,char * szPV)
 		if (strcmp(szPV + len - 2, "* ") == 0 || strcmp(szPV + len - 2, ". ") == 0)
 			szPV[len - 2] = '\0';  // Eliminamos los últimos dos caracteres
 	}
-	strcat(szPV, "* ");
+	len = strlen(szPV);
+	strncat(szPV, "* ", MAX_PV_SIZE - len - 1);
 
 	// 2. Tabla hash
 	for (j = 0; j < 30 && i < MAX_PLIES; j++, i++)
@@ -210,11 +209,16 @@ void ExtraerPVdeArray(TPosicion * pPos,char * szPV)
 
 		pPosTemp++;
 		Jug2SAN(pPosTemp, jug, szJugada);
-		strcat(szPV, szJugada);
-		strcat(szPV," ");
+		len = strlen(szPV);
+		strncat(szPV, szJugada, MAX_PV_SIZE - len - 1);
+		len = strlen(szPV);
+		strncat(szPV, " ", MAX_PV_SIZE - len - 1);
 
 		if (Pos_GetTurno(pPosTemp) == BLANCAS)
-			strcat(szPV, ". ");
+		{
+			len = strlen(szPV);
+			strncat(szPV, ". ", MAX_PV_SIZE - len - 1);
+		}
 
 		// Para tener una jugada que ponderar (de hash) en caso de no tenerla de PV
 		if (j == 0 && Jug_GetEsNula(dbDatosBusqueda.ajugPV[0][1]))
@@ -244,4 +248,3 @@ void ExtraerPVdeArray(TPosicion * pPos,char * szPV)
 			szPV[len - 2] = '\0';  // Eliminamos los últimos dos caracteres
 	}
 }
-

@@ -54,12 +54,13 @@ void DeterminarTiempoBusqueda(void)
 	#endif
 
 	// 09/01/25 Se ha dado algún caso anómalo, por error del GUI o lo que sea, que se toman tiempos negativos, así que asumo que siempre me queda, al menos, 1 segundo
-	if (g_tReloj.m_s32MilisegundosDisponibles < 1000)
+	// 22/08/25 Algunas personas están usando controles de tiempo muy cortos, así que no voy a reservar un segundo entero, sino una décima (100 milésimas)
+	if (g_tReloj.m_s32MilisegundosDisponibles < 100)
 	{
-		g_tReloj.m_s32MilisegundosDisponibles = 1000;
+		g_tReloj.m_s32MilisegundosDisponibles = 100;
 		#if (FICHERO_LOG == AV_LOG)
-			ImprimirALog("OJO: Reajuste a 1 segundo");
-		#endif	
+			ImprimirALog("OJO: Reajuste a 1 décima");
+		#endif		
 	}
 
 	//

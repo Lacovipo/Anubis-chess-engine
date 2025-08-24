@@ -1,5 +1,8 @@
-
+#ifdef _WIN32
 #include <windows.h>
+#else
+#include <unistd.h>
+#endif
 #include "Preprocesador.h"
 #include "Tipos.h"
 #include "Funciones.h"
@@ -25,9 +28,8 @@ static void ImprimirParcialPlyConPV(TPosicion * pPos, SINT32 s32Prof, SINT32 s32
 
 	ExtraerPVdeArray(pPos, szPVTemp);
 
-	sprintf(szPV, "(%d/%d%s) ", s32Prof, dbDatosBusqueda.s32ProfSel, c);
-	strcat(szPV, szPVTemp);
-
+	snprintf(szPV, sizeof(szPV), "(%d/%d%s) ", s32Prof, dbDatosBusqueda.s32ProfSel, c);
+	strncat(szPV, szPVTemp, sizeof(szPV) - strlen(szPV) - 1);
 
 	ImprimirCadenaGUI(s32Prof, s32Eval, szPV);
 }
@@ -44,8 +46,7 @@ static void ImprimirParcialPlySinPV(SINT32 s32Prof, SINT32 s32Eval, char* szJug)
 
 	char sz[20];
 
-	sprintf(sz, "(%d/%d) %s!?", s32Prof, dbDatosBusqueda.s32ProfSel, szJug);
-
+	snprintf(sz, sizeof(sz), "(%d/%d) %s!?", s32Prof, dbDatosBusqueda.s32ProfSel, szJug);
 
 	ImprimirCadenaGUI(s32Prof, s32Eval, sz);
 }

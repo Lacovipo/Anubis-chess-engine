@@ -1,14 +1,7 @@
 /*
 	Anubis
 
-	Copyright José Carlos Martínez Galán
-	Todos los derechos reservados
-
-	-------------------------------------
-
-	Módulo de implementación del generador de
-	movimientos que den jaque y no sean capturas
-	ni promociones
+	José Carlos Martínez Galán
 */
 
 #include "Preprocesador.h"
@@ -183,7 +176,7 @@ static TJugada * GenerarJugadasCasilla(TPosicion * pPos,
 			}
 			break;
 		default:
-			__assume(0);
+			UNREACHABLE();
 	}
 	return(pJugada);
 }

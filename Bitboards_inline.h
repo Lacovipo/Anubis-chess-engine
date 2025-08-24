@@ -4,19 +4,26 @@
 #include "Preprocesador.h"
 #include "Tipos.h"
 #include <assert.h>
-#include <intrin.h>
-#include <immintrin.h>
 #include "Variables.h"
 
+#if defined(_MSC_VER)
+	#if defined(__AVX2__)
+		#include <intrin.h>
+	#endif
+#endif
 
-INLINE UINT64 BB_Mask(UINT32 u32)
+#if defined(__AVX2__) 
+	#include <immintrin.h>  // Para pext y tzcnt
+#endif
+
+static INLINE UINT64 BB_Mask(UINT32 u32)
 {
 	assert(u32 < 64);
 	assert(au64Mask[u32] == 0x8000000000000000 >> u32);
 	return(0x8000000000000000 >> u32);
 }
 
-INLINE UINT64 BB_NoMask(UINT32 u32)
+static INLINE UINT64 BB_NoMask(UINT32 u32)
 {
 	return(~BB_Mask(u32));
 }
@@ -24,22 +31,34 @@ INLINE UINT64 BB_NoMask(UINT32 u32)
 /*
  * Primer uno
  */
-INLINE UINT32 PrimerUnoD(UINT64 bb)
+static INLINE UINT32 PrimerUnoD(UINT64 bb)
 {
+#ifdef _MSC_VER
 	return bb ? 63 - (UINT32)_tzcnt_u64(bb) : 64;
+#else
+	return bb ? 63 - (UINT32)__builtin_ctzll(bb) : 64;
+#endif
 }
 
-INLINE UINT32 PrimerUnoI(UINT64 bb)
+static INLINE UINT32 PrimerUnoI(UINT64 bb)
 {
+#ifdef _MSC_VER
 	return bb ? (UINT32)_lzcnt_u64(bb) : 64;
+#else
+	return bb ? (UINT32)__builtin_clzll(bb) : 64;
+#endif
 }
 
-INLINE UINT32 CuentaUnos(UINT64 bb)
+static INLINE UINT32 CuentaUnos(UINT64 bb)
 {
+#ifdef _MSC_VER
 	return((UINT32)__popcnt64(bb));
+#else
+	return((UINT32)__builtin_popcountll(bb));
+#endif
 }
 
-INLINE UINT32 PrimerUno(UINT64 bb)
+static INLINE UINT32 PrimerUno(UINT64 bb)
 {
 	return(PrimerUnoD(bb));
 }
@@ -54,7 +73,7 @@ INLINE UINT32 PrimerUno(UINT64 bb)
  * Descripción: Comprueba los bitboards de piezas para determinar qué hay en la casilla especificada
  *
  */
-INLINE UINT32 PiezaEnCasilla(TPosicion* pPos, UINT32 u32Casilla)
+static INLINE UINT32 PiezaEnCasilla(TPosicion* pPos, UINT32 u32Casilla)
 {
 	register UINT64 u64Casilla = BB_Mask(u32Casilla);
 
@@ -90,50 +109,49 @@ INLINE UINT32 PiezaEnCasilla(TPosicion* pPos, UINT32 u32Casilla)
 		return(VACIO);
 }
 
-INLINE void BB_InvertirBit(UINT64 * pu64BB, UINT32 u32Bit)
+static INLINE void BB_InvertirBit(UINT64 * pu64BB, UINT32 u32Bit)
 {
 	assert(u32Bit < 64);
 	*pu64BB ^= BB_Mask(u32Bit);
 }
-INLINE void BB_SetBit(UINT64 * pu64BB, UINT32 u32Bit)
+static INLINE void BB_SetBit(UINT64 * pu64BB, UINT32 u32Bit)
 {
 	assert(u32Bit < 64);
 	*pu64BB |= BB_Mask(u32Bit);
 }
-INLINE void BB_ClearBit(UINT64 * pu64BB, UINT32 u32Bit)
+static INLINE void BB_ClearBit(UINT64 * pu64BB, UINT32 u32Bit)
 {
 	assert(u32Bit < 64);
 	*pu64BB &= BB_NoMask(u32Bit);
 }
 static inline BOOL MasDeUnUno(UINT64 u64)
 {
-	//return(u64 & (u64 - 1));
 	return (u64 & (u64 - 1)) != 0;
 }
 
 // Rotaciones y desplazamientos
-INLINE UINT64 BB_GetShiftIzda(UINT64 u64BB)
+static INLINE UINT64 BB_GetShiftIzda(UINT64 u64BB)
 {
 	assert(!(((u64BB & BB_SINCOLIZDA) << 1) & BB_COLH1H8));
 	return((u64BB & BB_SINCOLIZDA) << 1);
 }
-INLINE UINT64 BB_GetShiftDcha(UINT64 u64BB)
+static INLINE UINT64 BB_GetShiftDcha(UINT64 u64BB)
 {
 	assert(!(((u64BB & BB_SINCOLDCHA) >> 1) & BB_COLA1A8));
 	return((u64BB & BB_SINCOLDCHA) >> 1);
 }
-INLINE UINT64 BB_GetShiftArriba(UINT64 u64BB)
+static INLINE UINT64 BB_GetShiftArriba(UINT64 u64BB)
 {
 	assert(!((u64BB << 8) & BB_FILA1H1));
 	return(u64BB << 8);
 }
-INLINE UINT64 BB_GetShiftAbajo(UINT64 u64BB)
+static INLINE UINT64 BB_GetShiftAbajo(UINT64 u64BB)
 {
 	assert(!((u64BB >> 8) & BB_FILA8H8));
 	return(u64BB >> 8);
 }
 
-INLINE UINT32 BB_GetBitYQuitar(UINT64 * pu64)
+static INLINE UINT32 BB_GetBitYQuitar(UINT64 * pu64)
 {
 	const UINT32 u32 = PrimerUno(*pu64);
 	BB_ClearBit(pu64, u32);

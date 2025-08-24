@@ -1,13 +1,7 @@
 /*
 	Anubis
 
-	Copyright José Carlos Martínez Galán
-	Todos los derechos reservados
-
-	-------------------------------------
-
-	Módulo de implementación del generador de
-	movimientos que no sean capturas
+	José Carlos Martínez Galán
 */
 #include "Preprocesador.h"
 #include "Tipos.h"

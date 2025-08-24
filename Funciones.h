@@ -101,7 +101,11 @@ BOOL InsuficienteMaterial(TPosicion * pPos);
 SINT32 DeterminarAmenaza(TPosicion* pPos);
 
 // Thread del motor
+#ifdef _MSC_VER
 UINT32 __stdcall MotorThread(void);
+#else
+void* MotorThread(void* arg);
+#endif
 BOOL ProcesarComando(void);
 void EnviarComandoAMotor(UINT32 u32Codigo, TPosicion * u32Param1, UINT32 u32Param2, char * szParam);
 

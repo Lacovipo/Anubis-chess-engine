@@ -24,7 +24,11 @@ SOFTWARE.
 
 #include <assert.h>
 //#include <stdatomic.h>
+#ifdef _WIN32
 #include <windows.h>
+#else
+#include <unistd.h>
+#endif
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -41,6 +45,8 @@ SOFTWARE.
 #define TB_MAX_PIECE (TB_PIECES < 7 ? 254 : 650)
 #define TB_MAX_PAWN  (TB_PIECES < 7 ? 256 : 861)
 #define TB_MAX_SYMS  4096
+
+typedef uint64_t Value;
 
 #ifndef _WIN32
 #include <fcntl.h>
@@ -111,26 +117,28 @@ using namespace std;
 #undef TB_SOFTWARE_POP_COUNT
 
 #if defined(TB_CUSTOM_POP_COUNT)
-#define popcount(x) TB_CUSTOM_POP_COUNT(x)
+    #define popcount(x) TB_CUSTOM_POP_COUNT(x)
 #elif defined(TB_NO_HW_POP_COUNT)
-#define TB_SOFTWARE_POP_COUNT
+    #define TB_SOFTWARE_POP_COUNT
 #elif defined (__GNUC__) && defined(__x86_64__) && defined(__SSE4_2__)
-#include <popcntintrin.h>
-#define popcount(x)             (int)_mm_popcnt_u64((x))
+    #include <popcntintrin.h>
+    #ifdef _MSC_VER
+        #define popcount(x)             (int)_mm_popcnt_u64((x))
+    #endif
 #elif defined(_MSC_VER) && (_MSC_VER >= 1500) && defined(_M_AMD64)
-#include <nmmintrin.h>
-#define popcount(x)             (int)_mm_popcnt_u64((x))
+    #include <nmmintrin.h>
+    #define popcount(x)             (int)_mm_popcnt_u64((x))
 #else
-// try to use a builtin
-#if defined (__has_builtin)
-#if __has_builtin(__builtin_popcountll)
-#define popcount(x) __builtin_popcountll((x))
-#else
-#define TB_SOFTWARE_POP_COUNT
-#endif
-#else
-#define TB_SOFTWARE_POP_COUNT
-#endif
+    // try to use a builtin
+    #if defined (__has_builtin)
+        #if __has_builtin(__builtin_popcountll)
+            #define popcount(x) __builtin_popcountll((x))
+        #else
+            #define TB_SOFTWARE_POP_COUNT
+        #endif
+    #else
+        #define TB_SOFTWARE_POP_COUNT
+    #endif
 #endif
 
 #ifdef TB_SOFTWARE_POP_COUNT
@@ -149,45 +157,36 @@ static inline unsigned tb_software_popcount(uint64_t x)
 
 // LSB (least-significant bit) implementation
 #ifdef TB_CUSTOM_LSB
-#define lsb(b) TB_CUSTOM_LSB(b)
-#else
-#if defined(__GNUC__)
-static inline unsigned lsb(uint64_t b) {
-    assert(b != 0);
-    return __builtin_ffsll(b)-1;
-}
+    #define lsb(b) TB_CUSTOM_LSB(b)
 #elif defined(_MSC_VER)
-static inline unsigned lsb(uint64_t b) {
-    assert(b != 0);
-    DWORD index;
-#ifdef _WIN64
-    _BitScanForward64(&index,b);
-    return (unsigned)index;
-#else
-    if (b & 0xffffffffULL) {
-      _BitScanForward(&index,(unsigned long)(b & 0xffffffffULL));
-      return (unsigned)index;
-    }
-    else {
-      _BitScanForward(&index,(unsigned long)(b >> 32));
-      return 32 + (unsigned)index;
-    }
-#endif
+    static inline unsigned lsb(uint64_t b)
+    {
+        assert(b != 0);
+        DWORD index;
+        #ifdef _WIN64
+            _BitScanForward64(&index,b);
+            return (unsigned)index;
+        #else
+            if (b & 0xffffffffULL)
+            {
+                _BitScanForward(&index,(unsigned long)(b & 0xffffffffULL));
+                return (unsigned)index;
+            }
+            else
+            {
+                _BitScanForward(&index,(unsigned long)(b >> 32));
+                return 32 + (unsigned)index;
+            }
+        #endif
 }
 #else
-/* not a compiler/architecture with recognized builtins */
-static uint32_t get_bit32(uint64_t x) {
-  return (uint32_t)(((int32_t)(x))&-((int32_t)(x)));
-}
-static const unsigned MAGIC32 = 0xe89b2be;
-static const uint32_t MagicTable32[32] = {31,0,9,1,10,20,13,2,7,11,21,23,17,14,3,25,30,8,19,12,6,22,16,24,29,18,5,15,28,4,27,26};
-static unsigned lsb(uint64_t b) {
-  if (b & 0xffffffffULL)
-    return MagicTable32[(get_bit32(b & 0xffffffffULL)*MAGIC32)>>27];
-  else
-    return MagicTable32[(get_bit32(b >> 32)*MAGIC32)>>27]+32;
-}
-#endif
+    /* not a compiler/architecture with recognized builtins */
+    static uint32_t get_bit32(uint64_t x)
+    {
+        return (uint32_t)(((int32_t)(x))&-((int32_t)(x)));
+    }
+    static const unsigned MAGIC32 = 0xe89b2be;
+    static const uint32_t MagicTable32[32] = {31,0,9,1,10,20,13,2,7,11,21,23,17,14,3,25,30,8,19,12,6,22,16,24,29,18,5,15,28,4,27,26};
 #endif
 
 #ifndef max

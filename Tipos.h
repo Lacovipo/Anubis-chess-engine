@@ -3,18 +3,88 @@
 
 #include "Preprocesador.h"
 #include <sys/timeb.h>
+#include <assert.h>
+#include <stdio.h>
+#include <string.h>
+#include <stdint.h>
+#include <stdbool.h>
 
 // Compatibilidad
-#define UINT8	unsigned __int8
-#define UINT16	unsigned __int16
-#define UINT32	unsigned __int32
-#define UINT64	unsigned __int64
-#define SINT8	signed __int8
-#define SINT16	signed __int16
-#define SINT32	signed __int32
-#define SINT64	signed __int64
-#define INLINE	__forceinline
-#define BOOL	unsigned __int32
+#ifdef _MSC_VER
+	#define UINT8	unsigned __int8
+	#define UINT16	unsigned __int16
+	#define UINT32	unsigned __int32
+	#define UINT64	unsigned __int64
+	#define SINT8	signed __int8
+	#define SINT16	signed __int16
+	#define SINT32	signed __int32
+	#define SINT64	signed __int64
+	#define INLINE	__forceinline
+	#define BOOL	unsigned __int32
+#else
+	typedef uint8_t  UINT8;
+	typedef uint16_t UINT16;
+	typedef uint32_t UINT32;
+	typedef uint64_t UINT64;
+	typedef int8_t   SINT8;
+	typedef int16_t  SINT16;
+	typedef int32_t  SINT32;
+	typedef int64_t  SINT64;
+	#undef BOOL
+	#define BOOL bool
+	#define INLINE __attribute__((always_inline))
+#endif
+
+#ifdef __linux__
+	#include <sys/time.h>
+	#include <time.h>
+	// This struct mimics the _timeb struct used by _ftime_s
+	struct timeb_portable {
+		time_t time;       // The time in seconds since the epoch
+		unsigned short millitm;  // The milliseconds
+	};
+
+	// A portable function to get the current time with millisecond precision
+	static inline void _ftime_s(struct timeb_portable* tp) {
+		struct timeval tv;
+		gettimeofday(&tv, NULL);
+
+		tp->time = tv.tv_sec;
+		tp->millitm = (unsigned short)(tv.tv_usec / 1000);
+	}
+
+	#include <stdarg.h>
+
+	static inline int scanf_s(const char* format, ...) {
+		va_list args;
+		va_start(args, format);
+		int result = vscanf(format, args);
+		va_end(args);
+		return result;
+	}
+
+#endif
+
+#if defined(__GNUC__) || defined(__clang__)
+	#define UNREACHABLE() __builtin_unreachable()
+#elif defined(_MSC_VER)
+	#define UNREACHABLE() __assume(0)
+#endif
+
+#ifdef __GNUC__
+	#undef min
+	#undef max
+	static inline SINT32 max(SINT32 a, SINT32 b) { return((a) > (b) ? a : b); }
+	static inline SINT32 min(SINT32 a, SINT32 b) { return((a) < (b) ? a : b); }
+	#define __assume(x) __builtin_unreachable(x)
+	static inline unsigned lsb(UINT64 b) {
+		assert(b != 0);
+		return __builtin_ffsll(b) - 1;
+	}
+
+	#define poplsb(x)               ((x) & ((x) - 1))
+	#define popcount(x)  __builtin_popcountll(x)
+#endif
 
 // Jugada
 typedef struct _TJugada
@@ -27,7 +97,11 @@ typedef struct _TJugada
 } TJugada;
 
 // Posición
+#ifdef _MSC_VER
 __declspec(align(64)) typedef struct _TPosicion
+#else
+__attribute__((aligned(64))) typedef struct _TPosicion
+#endif
 {
 	UINT64	u64PeonesB;				// Bitboards (piezas blancas)
 	UINT64	u64CaballosB;
@@ -90,6 +164,11 @@ __declspec(align(64)) typedef struct _TPosicion
 	// Último movimiento realizado (para refutación)
 	UINT8 UltMovPieza;
 	UINT8 UltMovHasta;
+
+#ifdef __GNUC__
+	// Padding to make the struct size a multiple of 64
+	UINT8 padding[40];
+#endif
 } TPosicion;
 
 // Hashing
@@ -210,27 +289,37 @@ typedef struct _TReloj
 	SINT64 m_s64TiempoCorteNormal;			// El momento en el que hemos de cortar, si todo va normal
 	SINT64 m_s64TiempoCorteExtendido;		// El momento en que hemos de cortar pase lo que pase
 } TReloj;
-INLINE SINT64 GetLecturaReloj(void)								{struct _timeb t; _ftime_s(&t); return(t.time * 1000 + t.millitm);}
-INLINE void PonerRelojEnMarcha(TReloj * ptReloj)				{ptReloj->m_s64MomentoInicioBusqueda = GetLecturaReloj();}
+
+#ifdef _WIN32
+static INLINE SINT64 GetLecturaReloj(void) { struct _timeb t; _ftime_s(&t); return(t.time * 1000 + t.millitm); }
+#else
+static INLINE SINT64 GetLecturaReloj(void) {
+	struct timeval t;
+	gettimeofday(&t, NULL);
+	return ((long long)t.tv_sec * 1000) + (t.tv_usec / 1000);
+}
+#endif
+
+static INLINE void PonerRelojEnMarcha(TReloj * ptReloj)				{ptReloj->m_s64MomentoInicioBusqueda = GetLecturaReloj();}
 #pragma warning(disable : 4244)
-INLINE double GetTiempoEsperadoNormal(TReloj * ptReloj)			{return((double)(ptReloj->m_s64TiempoCorteNormal - ptReloj->m_s64MomentoInicioBusqueda) / 1000.0);}
-INLINE double GetTiempoEsperadoExtendido(TReloj * ptReloj)		{return((double)(ptReloj->m_s64TiempoCorteExtendido - ptReloj->m_s64MomentoInicioBusqueda) / 1000.0);}
-INLINE double GetTiempoDisponible(TReloj * ptReloj)				{return((double)(ptReloj->m_s64MomentoInicioBusqueda + ptReloj->m_s32MilisegundosDisponibles - GetLecturaReloj()) / 1000.0);}
-INLINE void DetenerReloj(TReloj * ptReloj)
+static INLINE double GetTiempoEsperadoNormal(TReloj * ptReloj)			{return((double)(ptReloj->m_s64TiempoCorteNormal - ptReloj->m_s64MomentoInicioBusqueda) / 1000.0);}
+static INLINE double GetTiempoEsperadoExtendido(TReloj * ptReloj)		{return((double)(ptReloj->m_s64TiempoCorteExtendido - ptReloj->m_s64MomentoInicioBusqueda) / 1000.0);}
+static INLINE double GetTiempoDisponible(TReloj * ptReloj)				{return((double)(ptReloj->m_s64MomentoInicioBusqueda + ptReloj->m_s32MilisegundosDisponibles - GetLecturaReloj()) / 1000.0);}
+static INLINE void DetenerReloj(TReloj * ptReloj)
 {
 	SINT64 s64MilisegundosTranscurridos;
 	s64MilisegundosTranscurridos = GetLecturaReloj() - ptReloj->m_s64MomentoInicioBusqueda;
 	ptReloj->m_s32MilisegundosDisponibles -= s64MilisegundosTranscurridos;
 }
-INLINE double GetSegundosTranscurridos(TReloj * ptReloj)		{return((double)(GetLecturaReloj() - ptReloj->m_s64MomentoInicioBusqueda) / 1000);}
+static INLINE double GetSegundosTranscurridos(TReloj * ptReloj)		{return((double)(GetLecturaReloj() - ptReloj->m_s64MomentoInicioBusqueda) / 1000);}
 #pragma warning(default : 4244)
-INLINE SINT64 GetCentisegundosTranscurridos(TReloj * ptReloj)	{return((GetLecturaReloj() - ptReloj->m_s64MomentoInicioBusqueda) / 10);}
-INLINE BOOL GetSuperadoCorteObvia(TReloj * ptReloj)				{return(GetLecturaReloj() >= ptReloj->m_s64TiempoCorteObvia);}
-INLINE BOOL GetSuperadoCorteMedNormal(TReloj * ptReloj)			{return(GetLecturaReloj() - ptReloj->m_s64MomentoInicioBusqueda >= (ptReloj->m_s64TiempoCorteNormal - ptReloj->m_s64MomentoInicioBusqueda) / 2);}
-INLINE BOOL GetSuperadoCorteDosTerNormal(TReloj * ptReloj)		{return(GetLecturaReloj() - ptReloj->m_s64MomentoInicioBusqueda >= 2 * (ptReloj->m_s64TiempoCorteNormal - ptReloj->m_s64MomentoInicioBusqueda) / 3);}
-INLINE BOOL GetSuperadoCorteNormal(TReloj * ptReloj)			{return(GetLecturaReloj() >= ptReloj->m_s64TiempoCorteNormal);}
-INLINE BOOL GetSuperadoCorteExtendido(TReloj * ptReloj)			{return(GetLecturaReloj() >= ptReloj->m_s64TiempoCorteExtendido);}
-INLINE BOOL GetEsHoraDeParar(TReloj * ptReloj, TDatosBusqueda * ptDatosBusqueda, SINT32 aPilaEval[])
+static INLINE SINT64 GetCentisegundosTranscurridos(TReloj * ptReloj)	{return((GetLecturaReloj() - ptReloj->m_s64MomentoInicioBusqueda) / 10);}
+static INLINE BOOL GetSuperadoCorteObvia(TReloj * ptReloj)				{return(GetLecturaReloj() >= ptReloj->m_s64TiempoCorteObvia);}
+static INLINE BOOL GetSuperadoCorteMedNormal(TReloj * ptReloj)			{return(GetLecturaReloj() - ptReloj->m_s64MomentoInicioBusqueda >= (ptReloj->m_s64TiempoCorteNormal - ptReloj->m_s64MomentoInicioBusqueda) / 2);}
+static INLINE BOOL GetSuperadoCorteDosTerNormal(TReloj * ptReloj)		{return(GetLecturaReloj() - ptReloj->m_s64MomentoInicioBusqueda >= 2 * (ptReloj->m_s64TiempoCorteNormal - ptReloj->m_s64MomentoInicioBusqueda) / 3);}
+static INLINE BOOL GetSuperadoCorteNormal(TReloj * ptReloj)			{return(GetLecturaReloj() >= ptReloj->m_s64TiempoCorteNormal);}
+static INLINE BOOL GetSuperadoCorteExtendido(TReloj * ptReloj)			{return(GetLecturaReloj() >= ptReloj->m_s64TiempoCorteExtendido);}
+static INLINE BOOL GetEsHoraDeParar(TReloj * ptReloj, TDatosBusqueda * ptDatosBusqueda, SINT32 aPilaEval[])
 {
 	if (ptDatosBusqueda->eTipoBusqueda != TBU_PARTIDA)
 		return(0);
@@ -243,7 +332,7 @@ INLINE BOOL GetEsHoraDeParar(TReloj * ptReloj, TDatosBusqueda * ptDatosBusqueda,
 		if (ptDatosBusqueda->u32NumPlyPartida > 1)
 			if (ptDatosBusqueda->s32EvalRoot <= aPilaEval[ptDatosBusqueda->u32NumPlyPartida - 2] - 30)
 				return(0);
-		if (ptDatosBusqueda->s32CambiosJugMejor > 0)		// 08/02/25 0.63 Tengo inestabilidad en la jugada principal
+		if (ptDatosBusqueda->s32CambiosJugMejor > 0)
 			return(0);
 		if (!ptDatosBusqueda->bAnalizandoPV)
 			return(0);

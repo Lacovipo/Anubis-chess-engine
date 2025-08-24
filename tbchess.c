@@ -22,6 +22,7 @@ SOFTWARE.
 */
 
 #include "tbprobe.h"
+#include "Tipos.h"
 #include <assert.h>
 
 #define TB_PAWN 1
@@ -87,26 +88,26 @@ static inline PieceType TypeOfPiece(int piece)
     return (PieceType)(piece & 7);
 }
 
-typedef signed __int32 Value;
+//typedef signed __int32 Value;
 
 typedef struct Pos
 {
-    unsigned __int64 white;
-    unsigned __int64 black;
-    unsigned __int64 kings;
-    unsigned __int64 queens;
-    unsigned __int64 rooks;
-    unsigned __int64 bishops;
-    unsigned __int64 knights;
-    unsigned __int64 pawns;
-    unsigned __int8 rule50;
-    unsigned __int8 ep;
+    UINT64 white;
+    UINT64 black;
+    UINT64 kings;
+    UINT64 queens;
+    UINT64 rooks;
+    UINT64 bishops;
+    UINT64 knights;
+    UINT64 pawns;
+    UINT8 rule50;
+    UINT8 ep;
     int turn;
 } Pos;
 
-static inline unsigned __int64 pieces_by_type(const Pos *pos, Color c, PieceType p)
+static inline UINT64 pieces_by_type(const Pos *pos, Color c, PieceType p)
 {
-    unsigned __int64 mask = (c == WHITE) ? pos->white : pos->black;
+    UINT64 mask = (c == WHITE) ? pos->white : pos->black;
     switch(p)
     {
         case PAWN:
@@ -140,7 +141,7 @@ static PieceType char_to_piece_type(char c) {
 
 #define rank(s)                 ((s) >> 3)
 #define file(s)                 ((s) & 0x07)
-#define board(s)                ((unsigned __int64)1 << (s))
+#define board(s)                ((UINT64)1 << (s))
 #define square(r, f)            (8 * (r) + (f))
 
 #ifdef TB_KING_ATTACKS
@@ -148,7 +149,7 @@ static PieceType char_to_piece_type(char c) {
 #define king_attacks_init()     /* NOP */
 #else       /* TB_KING_ATTACKS */
 
-static unsigned __int64 king_attacks_table[64];
+static UINT64 king_attacks_table[64];
 
 #define king_attacks(s)         king_attacks_table[(s)]
 
@@ -158,7 +159,7 @@ static void king_attacks_init(void)
     {
         unsigned r = rank(s);
         unsigned f = file(s);
-        unsigned __int64 b = 0;
+        UINT64 b = 0;
         if (r != 0 && f != 0)
             b |= board(square(r-1, f-1));
         if (r != 0)
@@ -186,7 +187,7 @@ static void king_attacks_init(void)
 #define knight_attacks_init()   /* NOP */
 #else       /* TB_KNIGHT_ATTACKS */
 
-static unsigned __int64 knight_attacks_table[64];
+static UINT64 knight_attacks_table[64];
 
 #define knight_attacks(s)       knight_attacks_table[(s)]
 
@@ -196,7 +197,7 @@ static void knight_attacks_init(void)
     {
         int r1, r = rank(s);
         int f1, f = file(s);
-        unsigned __int64 b = 0;
+        UINT64 b = 0;
         r1 = r-1; f1 = f-2;
         if (r1 >= 0 && f1 >= 0)
             b |= board(square(r1, f1));
@@ -232,8 +233,8 @@ static void knight_attacks_init(void)
 #define bishop_attacks_init()   /* NOP */
 #else       /* TB_BISHOP_ATTACKS */
 
-static unsigned __int64 diag_attacks_table[64][64];
-static unsigned __int64 anti_attacks_table[64][64];
+static UINT64 diag_attacks_table[64][64];
+static UINT64 anti_attacks_table[64][64];
 
 static const unsigned square2diag_table[64] =
 {
@@ -259,7 +260,7 @@ static const unsigned square2anti_table[64] =
     0,  1,  2,  3,  4,  5,  6,  7
 };
 
-static const unsigned __int64 diag2board_table[15] =
+static const UINT64 diag2board_table[15] =
 {
     0x8040201008040201ull,
     0x0080402010080402ull,
@@ -278,7 +279,7 @@ static const unsigned __int64 diag2board_table[15] =
     0x4020100804020100ull,
 };
 
-static const unsigned __int64 anti2board_table[15] =
+static const UINT64 anti2board_table[15] =
 {
     0x0102040810204080ull,
     0x0204081020408000ull,
@@ -297,15 +298,15 @@ static const unsigned __int64 anti2board_table[15] =
     0x0001020408102040ull,
 };
 
-static inline unsigned __int64 diag2index(unsigned __int64 b)
+static inline UINT64 diag2index(UINT64 b)
 {
     b *= 0x0101010101010101ull;
     b >>= 56;
     b >>= 1;
-    return (unsigned __int64)b;
+    return (UINT64)b;
 }
 
-static inline unsigned __int64 anti2index(unsigned __int64 b)
+static inline UINT64 anti2index(UINT64 b)
 {
     return diag2index(b);
 }
@@ -315,16 +316,16 @@ static inline unsigned __int64 anti2index(unsigned __int64 b)
 #define diag2board(d)           diag2board_table[(d)]
 #define anti2board(a)           anti2board_table[(a)]
 
-static unsigned __int64 bishop_attacks(unsigned sq, unsigned __int64 occ)
+static UINT64 bishop_attacks(unsigned sq, UINT64 occ)
 {
     occ &= ~board(sq);
     unsigned d = diag(sq), a = anti(sq);
-    unsigned __int64 d_occ = occ & (diag2board(d) & ~BOARD_EDGE);
-    unsigned __int64 a_occ = occ & (anti2board(a) & ~BOARD_EDGE);
-    unsigned __int64 d_idx = diag2index(d_occ);
-    unsigned __int64 a_idx = anti2index(a_occ);
-    unsigned __int64 d_attacks = diag_attacks_table[sq][d_idx];
-    unsigned __int64 a_attacks = anti_attacks_table[sq][a_idx];
+    UINT64 d_occ = occ & (diag2board(d) & ~BOARD_EDGE);
+    UINT64 a_occ = occ & (anti2board(a) & ~BOARD_EDGE);
+    UINT64 d_idx = diag2index(d_occ);
+    UINT64 a_idx = anti2index(a_occ);
+    UINT64 d_attacks = diag_attacks_table[sq][d_idx];
+    UINT64 a_attacks = anti_attacks_table[sq][a_idx];
     return d_attacks | a_attacks;
 }
 
@@ -337,7 +338,7 @@ static void bishop_attacks_init(void)
         {
             int r = rank(s);
             int f = file(s);
-            unsigned __int64 b = 0;
+            UINT64 b = 0;
             for (int i = -1; f + i >= 0 && r + i >= 0; i--)
             {
                 unsigned occ = (1 << (f + i));
@@ -363,7 +364,7 @@ static void bishop_attacks_init(void)
         {
             int r = rank(s);
             int f = file(s);
-            unsigned __int64 b = 0;
+            UINT64 b = 0;
             for (int i = -1; f + i >= 0 && r - i <= 7; i--)
             {
                 unsigned occ = (1 << (f + i));
@@ -390,38 +391,38 @@ static void bishop_attacks_init(void)
 #define rook_attacks_init()     /* NOP */
 #else       /* TB_ROOK_ATTACKS */
 
-static unsigned __int64 rank_attacks_table[64][64];
-static unsigned __int64 file_attacks_table[64][64];
+static UINT64 rank_attacks_table[64][64];
+static UINT64 file_attacks_table[64][64];
 
-static inline unsigned __int64 rank2index(unsigned __int64 b, unsigned r)
+static inline UINT64 rank2index(UINT64 b, unsigned r)
 {
     b >>= (8 * r);
     b >>= 1;
-    return (unsigned __int64)b;
+    return (UINT64)b;
 }
 
-static inline unsigned __int64 file2index(unsigned __int64 b, unsigned f)
+static inline UINT64 file2index(UINT64 b, unsigned f)
 {
     b >>= f;
     b *= 0x0102040810204080ull;
     b >>= 56;
     b >>= 1;
-    return (unsigned __int64)b;
+    return (UINT64)b;
 }
 
 #define rank2board(r)           (0xFFull << (8 * (r)))
 #define file2board(f)           (0x0101010101010101ull << (f))
 
-static unsigned __int64 rook_attacks(unsigned sq, unsigned __int64 occ)
+static UINT64 rook_attacks(unsigned sq, UINT64 occ)
 {
     occ &= ~board(sq);
     unsigned r = rank(sq), f = file(sq);
-    unsigned __int64 r_occ = occ & (rank2board(r) & ~BOARD_RANK_EDGE);
-    unsigned __int64 f_occ = occ & (file2board(f) & ~BOARD_FILE_EDGE);
-    unsigned __int64 r_idx = rank2index(r_occ, r);
-    unsigned __int64 f_idx = file2index(f_occ, f);
-    unsigned __int64 r_attacks = rank_attacks_table[sq][r_idx];
-    unsigned __int64 f_attacks = file_attacks_table[sq][f_idx];
+    UINT64 r_occ = occ & (rank2board(r) & ~BOARD_RANK_EDGE);
+    UINT64 f_occ = occ & (file2board(f) & ~BOARD_FILE_EDGE);
+    UINT64 r_idx = rank2index(r_occ, r);
+    UINT64 f_idx = file2index(f_occ, f);
+    UINT64 r_attacks = rank_attacks_table[sq][r_idx];
+    UINT64 f_attacks = file_attacks_table[sq][f_idx];
     return r_attacks | f_attacks;
 }
 
@@ -432,7 +433,7 @@ static void rook_attacks_init(void)
         unsigned idx1 = idx << 1, occ;
         for (int f = 0; f <= 7; f++)
         {
-            unsigned __int64 b = 0;
+            UINT64 b = 0;
             if (f > 0)
             {
                 int i = f-1;
@@ -467,7 +468,7 @@ static void rook_attacks_init(void)
         unsigned idx1 = idx << 1, occ;
         for (int r = 0; r <= 7; r++)
         {
-            unsigned __int64 b = 0;
+            UINT64 b = 0;
             if (r > 0)
             {
                 int i = r-1;
@@ -513,7 +514,7 @@ static void rook_attacks_init(void)
 #define pawn_attacks_init()     /* NOP */
 #else       /* TB_PAWN_ATTACKS */
 
-static unsigned __int64 pawn_attacks_table[2][64];
+static UINT64 pawn_attacks_table[2][64];
 
 #define pawn_attacks(s, c)      pawn_attacks_table[(c)][(s)]
 
@@ -524,7 +525,7 @@ static void pawn_attacks_init(void)
         int r = rank(s);
         int f = file(s);
 
-        unsigned __int64 b = 0;
+        UINT64 b = 0;
         if (r != 7)
         {
             if (f != 0)
@@ -551,12 +552,12 @@ static void pawn_attacks_init(void)
 /*
  * Given a position, produce a 64-bit material signature key.
  */
-static unsigned __int64 calc_key(const Pos *pos, int mirror)
+static UINT64 calc_key(const Pos *pos, int mirror)
 {
-    unsigned __int64 white = pos->white, black = pos->black;
+    UINT64 white = pos->white, black = pos->black;
     if (mirror)
     {
-        unsigned __int64 tmp = white;
+        UINT64 tmp = white;
         white = black;
         black = tmp;
     }
@@ -576,7 +577,7 @@ static unsigned __int64 calc_key(const Pos *pos, int mirror)
 // defined by pcs[16], where pcs[1], ..., pcs[6] are the number of white
 // pawns, ..., kings and pcs[9], ..., pcs[14] are the number of black
 // pawns, ..., kings.
-static unsigned __int64 calc_key_from_pcs(int *pcs, int mirror)
+static UINT64 calc_key_from_pcs(int *pcs, int mirror)
 {
     mirror = (mirror? 8: 0);
     return pcs[WHITE_QUEEN ^ mirror] * PRIME_WHITE_QUEEN +
@@ -594,10 +595,10 @@ static unsigned __int64 calc_key_from_pcs(int *pcs, int mirror)
 // Produce a 64-bit material key corresponding to the material combination
 // piece[0], ..., piece[num - 1], where each value corresponds to a piece
 // (1-6 for white pawn-king, 9-14 for black pawn-king).
-static unsigned __int64 calc_key_from_pieces(unsigned __int8 *piece, int num)
+static UINT64 calc_key_from_pieces(unsigned __int8 *piece, int num)
 {
-    unsigned __int64 key = 0;
-    static const unsigned __int64 keys[16] = {0,PRIME_WHITE_PAWN,PRIME_WHITE_KNIGHT,
+    UINT64 key = 0;
+    static const UINT64 keys[16] = {0,PRIME_WHITE_PAWN,PRIME_WHITE_KNIGHT,
                                       PRIME_WHITE_BISHOP,PRIME_WHITE_ROOK,
                                       PRIME_WHITE_QUEEN,0,0,PRIME_BLACK_PAWN,
                                       PRIME_BLACK_KNIGHT,PRIME_BLACK_BISHOP,
@@ -652,10 +653,10 @@ static TbMove *add_move(TbMove *moves, bool promotes, unsigned from,
  */
 static TbMove *gen_captures(const Pos *pos, TbMove *moves)
 {
-    unsigned __int64 occ = pos->white | pos->black;
-    unsigned __int64 us = (pos->turn? pos->white: pos->black),
+    UINT64 occ = pos->white | pos->black;
+    UINT64 us = (pos->turn? pos->white: pos->black),
              them = (pos->turn? pos->black: pos->white);
-    unsigned __int64 b, att;
+    UINT64 b, att;
     {
         unsigned from = lsb(pos->kings & us);
         assert(from < 64);
@@ -725,10 +726,10 @@ static TbMove *gen_captures(const Pos *pos, TbMove *moves)
  */
 static TbMove *gen_moves(const Pos *pos, TbMove *moves)
 {
-    unsigned __int64 occ = pos->white | pos->black;
-    unsigned __int64 us = (pos->turn? pos->white: pos->black),
+    UINT64 occ = pos->white | pos->black;
+    UINT64 us = (pos->turn? pos->white: pos->black),
              them = (pos->turn? pos->black: pos->white);
-    unsigned __int64 b, att;
+    UINT64 b, att;
     
     {
         unsigned from = lsb(pos->kings & us);
@@ -810,7 +811,7 @@ static bool is_en_passant(const Pos *pos, TbMove move)
 {
     uint16_t from = move_from(move);
     uint16_t to   = move_to(move);
-    unsigned __int64 us = (pos->turn? pos->white: pos->black);
+    UINT64 us = (pos->turn? pos->white: pos->black);
     if (pos->ep == 0)
         return false;
     if (to != pos->ep)
@@ -827,7 +828,7 @@ static bool is_en_passant(const Pos *pos, TbMove move)
 static bool is_capture(const Pos *pos, TbMove move)
 {
    uint16_t to   = move_to(move);
-   unsigned __int64 them = (pos->turn? pos->black: pos->white);
+   UINT64 them = (pos->turn? pos->black: pos->white);
    return (them & board(to)) != 0 || is_en_passant(pos,move);
 }
 
@@ -838,17 +839,17 @@ static bool is_capture(const Pos *pos, TbMove move)
  */
 static bool is_legal(const Pos *pos)
 {
-    unsigned __int64 occ = pos->white | pos->black;
-    unsigned __int64 us = (pos->turn? pos->black: pos->white),
+    UINT64 occ = pos->white | pos->black;
+    UINT64 us = (pos->turn? pos->black: pos->white),
              them = (pos->turn? pos->white: pos->black);
-    unsigned __int64 king = pos->kings & us;
+    UINT64 king = pos->kings & us;
     if (!king)
         return false;
     unsigned sq = lsb(king);
     if (king_attacks(sq) & (pos->kings & them))
         return false;
-    unsigned __int64 ratt = rook_attacks(sq, occ);
-    unsigned __int64 batt = bishop_attacks(sq, occ);
+    UINT64 ratt = rook_attacks(sq, occ);
+    UINT64 batt = bishop_attacks(sq, occ);
     if (ratt & (pos->rooks & them))
         return false;
     if (batt & (pos->bishops & them))
@@ -867,14 +868,14 @@ static bool is_legal(const Pos *pos)
  */
 static bool is_check(const Pos *pos)
 {
-    unsigned __int64 occ = pos->white | pos->black;
-    unsigned __int64 us = (pos->turn? pos->white: pos->black),
+    UINT64 occ = pos->white | pos->black;
+    UINT64 us = (pos->turn? pos->white: pos->black),
              them = (pos->turn? pos->black: pos->white);
-    unsigned __int64 king = pos->kings & us;
+    UINT64 king = pos->kings & us;
     assert(king != 0);
     unsigned sq = lsb(king);
-    unsigned __int64 ratt = rook_attacks(sq, occ);
-    unsigned __int64 batt = bishop_attacks(sq, occ);
+    UINT64 ratt = rook_attacks(sq, occ);
+    UINT64 batt = bishop_attacks(sq, occ);
     if (ratt & (pos->rooks & them))
         return true;
     if (batt & (pos->bishops & them))
@@ -987,7 +988,7 @@ static bool do_move(Pos *pos, const Pos *pos0, TbMove move)
         else if (to == pos0->ep)
         {
             unsigned ep_to = (pos0->turn? to-8: to+8);
-            unsigned __int64 ep_mask = ~board(ep_to);
+            UINT64 ep_mask = ~board(ep_to);
             pos->white &= ep_mask;
             pos->black &= ep_mask;
             pos->pawns &= ep_mask;

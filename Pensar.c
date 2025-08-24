@@ -49,7 +49,7 @@ static void ImprimirCabeceraBusqueda(void)
  */
 void Ordenar(TPosicion * pPos, TJugada * pJugada)
 {
-	BOOL			bOrdenado = FALSE;
+	BOOL		bOrdenado = FALSE;
 	TJugada		jug;
 	TJugada	*	pJug1;
 	TJugada	*	pJug2;

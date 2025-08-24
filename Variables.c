@@ -1,14 +1,7 @@
 /*
 	Anubis
 
-	Copyright José Carlos Martínez Galán
-	Todos los derechos reservados
-
-	-------------------------------------
-
-	Módulo de definición de variables
-
-	Última modificación: 17/09/2003
+	José Carlos Martínez Galán
 */
 
 #include "Preprocesador.h"

@@ -97,7 +97,7 @@ BOOL JugadaCorrecta(TPosicion * pPos, TJugada jug)
 					return(FALSE);
 				break;
 			default:
-				__assume(0);
+				UNREACHABLE();
 		}
 	} // if (Pos_GetTurno(pPos) == BLANCAS)
 	else
@@ -165,7 +165,7 @@ BOOL JugadaCorrecta(TPosicion * pPos, TJugada jug)
 					return(FALSE);
 				break;
 			default:
-				__assume(0);
+				UNREACHABLE();
 		}
 	} // else [if (Pos_GetTurno(pPos) == BLANCAS)]
 

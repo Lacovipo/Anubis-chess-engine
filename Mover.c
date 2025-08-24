@@ -1,13 +1,8 @@
 /*
 	Anubis
 
-	Copyright José Carlos Martínez Galán
-	Todos los derechos reservados
-
-	-------------------------------------
-
-	Módulo de implementación de la función
-	Mover
+	José Carlos Martínez Galán
+	Many fixed thanks to Jim Ablett
 */
 
 #include "Preprocesador.h"
@@ -54,6 +49,11 @@ static inline void Captura(TPosicion* pPosNueva, UINT32 u32PiezaEnDestino, UINT3
 			pPosNueva->u64HashSignature ^= au64TorreB_Random[u32Hasta];
 			pPosNueva->s32EvalMaterial -= VAL_TORRE;
 			pPosNueva->u64TodasB ^= BBMASK_HASTA;
+			// FIX: Handle castling rights when rook is captured
+			if (u32Hasta == TAB_A1)
+				Pos_SetNoEnroqueLargoB(pPosNueva);
+			else if (u32Hasta == TAB_H1)
+				Pos_SetNoEnroqueCortoB(pPosNueva);
 			return;
 		case DB:
 			pPosNueva->u64DamasB ^= BBMASK_HASTA;
@@ -89,6 +89,11 @@ static inline void Captura(TPosicion* pPosNueva, UINT32 u32PiezaEnDestino, UINT3
 			pPosNueva->u64HashSignature ^= au64TorreN_Random[u32Hasta];
 			pPosNueva->s32EvalMaterial += VAL_TORRE;
 			pPosNueva->u64TodasN ^= BBMASK_HASTA;
+			// FIX: Handle castling rights when rook is captured
+			if (u32Hasta == TAB_A8)
+				Pos_SetNoEnroqueLargoN(pPosNueva);
+			else if (u32Hasta == TAB_H8)
+				Pos_SetNoEnroqueCortoN(pPosNueva);
 			return;
 		case DN:
 			pPosNueva->u64DamasN ^= BBMASK_HASTA;
@@ -98,12 +103,17 @@ static inline void Captura(TPosicion* pPosNueva, UINT32 u32PiezaEnDestino, UINT3
 			pPosNueva->u64TodasN ^= BBMASK_HASTA;
 			return;
 		default:
-			__assume(0);
+			UNREACHABLE();
 	}
 }
 
 BOOL Mover(TPosicion * pPos,TJugada * pJug)
 {
+	// FIX: Add null pointer checks to prevent crashes
+	// Esto no debería pasar nunca (o estaríamos ante una catástrofe irreparable)
+	if (!pPos || !pJug)
+		return FALSE;
+	
 	TPosicion* pPosNueva;
 	const UINT32 u32Desde = Jug_GetDesde(*pJug);
 	const UINT32 u32Hasta = Jug_GetHasta(*pJug);
@@ -111,6 +121,15 @@ BOOL Mover(TPosicion * pPos,TJugada * pJug)
 	const UINT32 u32PiezaEnDestino = PiezaEnCasilla(pPos, u32Hasta);
 	const UINT64 BBMASK_DESDE = BB_Mask(u32Desde);
 	const UINT64 BBMASK_HASTA = BB_Mask(u32Hasta);
+
+	// FIX: Validate square indices to prevent buffer overruns
+	// Esto no debería pasar nunca (o estaríamos ante una catástrofe irreparable)
+	if (u32Desde > 63 || u32Hasta > 63)
+		return FALSE;
+
+	// FIX: Validate that there's actually a piece to move
+	if (u32PiezaEnOrigen == VACIO)
+		return FALSE;
 
 	pPosNueva = pPos + 1;
 	*pPosNueva = *pPos;
@@ -190,7 +209,9 @@ BOOL Mover(TPosicion * pPos,TJugada * pJug)
 						pPosNueva->s32EvalMaterial += VAL_ALFIL;
 						break;
 					default:
-						__assume(0);
+						// FIX: Return FALSE instead of UNREACHABLE for invalid promotion
+						// Esto también sería catástrofe si ocurriera, una jugada que intenta promocionar una pieza que no existe...
+						return FALSE;
 				}
 			}
 
@@ -207,6 +228,10 @@ BOOL Mover(TPosicion * pPos,TJugada * pJug)
 			}
 			else
 			{
+				// FIX: Validate that we're not capturing our own piece
+				if ((u32PiezaEnDestino >= PB && u32PiezaEnDestino <= RB))
+					return FALSE;
+				
 				BB_InvertirBit(&pPosNueva->u64TodasN,u32Hasta);
 				switch (u32PiezaEnDestino)
 				{
@@ -233,6 +258,11 @@ BOOL Mover(TPosicion * pPos,TJugada * pJug)
 						pPosNueva->u64HashSignature ^= au64TorreN_Random[u32Hasta];
 						pPosNueva->u8NumPiezasN--;
 						pPosNueva->s32EvalMaterial += VAL_TORRE;
+						// FIX: Handle castling rights when capturing rook
+						if (u32Hasta == TAB_A8)
+							Pos_SetNoEnroqueLargoN(pPosNueva);
+						else if (u32Hasta == TAB_H8)
+							Pos_SetNoEnroqueCortoN(pPosNueva);
 						break;
 					case DN:
 						pPosNueva->u64DamasN ^= BBMASK_HASTA;
@@ -241,7 +271,8 @@ BOOL Mover(TPosicion * pPos,TJugada * pJug)
 						pPosNueva->s32EvalMaterial += VAL_DAMA;
 						break;
 					default:
-						__assume(0);
+						// FIX: Return FALSE instead of UNREACHABLE for invalid capture
+						return FALSE;
 				}
 			}
 			break;
@@ -262,7 +293,12 @@ BOOL Mover(TPosicion * pPos,TJugada * pJug)
 			if (u32PiezaEnDestino == VACIO)				
 				pPosNueva->u8Cincuenta++;	// No hay jugada irreversible
 			else
+			{
+				// FIX: Validate that we're not capturing our own piece
+				if ((u32PiezaEnDestino >= PB && u32PiezaEnDestino <= RB))
+					return FALSE;
 				Captura(pPosNueva, u32PiezaEnDestino, u32Hasta, BBMASK_HASTA);
+			}
 			break;
 		case AB:
 			/*
@@ -281,7 +317,13 @@ BOOL Mover(TPosicion * pPos,TJugada * pJug)
 			if (u32PiezaEnDestino == VACIO)
 				pPosNueva->u8Cincuenta++;	// No hay jugada irreversible
 			else
+			{
+				// FIX: Validate that we're not capturing our own piece
+				if ((u32PiezaEnDestino >= PB && u32PiezaEnDestino <= RB)) {
+					return FALSE;
+				}
 				Captura(pPosNueva, u32PiezaEnDestino, u32Hasta, BBMASK_HASTA);
+			}
 			break;
 		case TB:
 			/*
@@ -300,7 +342,12 @@ BOOL Mover(TPosicion * pPos,TJugada * pJug)
 			if (u32PiezaEnDestino == VACIO)
 				pPosNueva->u8Cincuenta++;	// No hay jugada irreversible
 			else
+			{
+				// FIX: Validate that we're not capturing our own piece
+				if ((u32PiezaEnDestino >= PB && u32PiezaEnDestino <= RB))
+					return FALSE;
 				Captura(pPosNueva, u32PiezaEnDestino, u32Hasta, BBMASK_HASTA);
+			}
 
 			// Puede que haya que quitar derechos de enroque
 			if (u32Desde == TAB_H1)
@@ -341,7 +388,12 @@ BOOL Mover(TPosicion * pPos,TJugada * pJug)
 			if (u32PiezaEnDestino == VACIO)
 				pPosNueva->u8Cincuenta++;	// No hay jugada irreversible
 			else
+			{
+				// FIX: Validate that we're not capturing our own piece
+				if ((u32PiezaEnDestino >= PB && u32PiezaEnDestino <= RB))
+					return FALSE;
 				Captura(pPosNueva, u32PiezaEnDestino, u32Hasta, BBMASK_HASTA);
+			}
 			break;
 		case RB:
 			/*
@@ -390,7 +442,12 @@ BOOL Mover(TPosicion * pPos,TJugada * pJug)
 				pPosNueva->u8Cincuenta++;
 			}
 			else
+			{
+				// FIX: Validate that we're not capturing our own piece
+				if ((u32PiezaEnDestino >= PB && u32PiezaEnDestino <= RB))
+					return FALSE;
 				Captura(pPosNueva, u32PiezaEnDestino, u32Hasta, BBMASK_HASTA);
+			}
 			break;
 		case PN:
 			/*
@@ -455,7 +512,8 @@ BOOL Mover(TPosicion * pPos,TJugada * pJug)
 						pPosNueva->s32EvalMaterial -= VAL_ALFIL;
 						break;
 					default:
-						__assume(0);
+						// FIX: Return FALSE instead of UNREACHABLE for invalid promotion
+						return FALSE;
 				}
 			}
 
@@ -472,6 +530,10 @@ BOOL Mover(TPosicion * pPos,TJugada * pJug)
 			}
 			else
 			{
+				// FIX: Validate that we're not capturing our own piece
+				if ((u32PiezaEnDestino >= PN && u32PiezaEnDestino <= RN))
+					return FALSE;
+				
 				BB_InvertirBit(&pPosNueva->u64TodasB,u32Hasta);
 				switch (u32PiezaEnDestino)
 				{
@@ -498,6 +560,11 @@ BOOL Mover(TPosicion * pPos,TJugada * pJug)
 						pPosNueva->u64HashSignature ^= au64TorreB_Random[u32Hasta];
 						pPosNueva->u8NumPiezasB--;
 						pPosNueva->s32EvalMaterial -= VAL_TORRE;
+						// FIX: Handle castling rights when capturing rook
+						if (u32Hasta == TAB_A1)
+							Pos_SetNoEnroqueLargoB(pPosNueva);
+						else if (u32Hasta == TAB_H1)
+							Pos_SetNoEnroqueCortoB(pPosNueva);
 						break;
 					case DB:
 						pPosNueva->u64DamasB ^= BBMASK_HASTA;
@@ -506,7 +573,8 @@ BOOL Mover(TPosicion * pPos,TJugada * pJug)
 						pPosNueva->s32EvalMaterial -= VAL_DAMA;
 						break;
 					default:
-						__assume(0);
+						// FIX: Return FALSE instead of UNREACHABLE for invalid capture
+						return FALSE;
 				}
 			}
 			break;
@@ -527,7 +595,12 @@ BOOL Mover(TPosicion * pPos,TJugada * pJug)
 			if (u32PiezaEnDestino == VACIO)
 				pPosNueva->u8Cincuenta++;	// No hay jugada irreversible
 			else
+			{
+				// FIX: Validate that we're not capturing our own piece
+				if ((u32PiezaEnDestino >= PN && u32PiezaEnDestino <= RN))
+					return FALSE;
 				Captura(pPosNueva, u32PiezaEnDestino, u32Hasta, BBMASK_HASTA);
+			}
 			break;
 		case AN:
 			/*
@@ -546,7 +619,13 @@ BOOL Mover(TPosicion * pPos,TJugada * pJug)
 			if (u32PiezaEnDestino == VACIO)
 				pPosNueva->u8Cincuenta++;	// No hay jugada irreversible
 			else
+			{
+				// FIX: Validate that we're not capturing our own piece
+				if ((u32PiezaEnDestino >= PN && u32PiezaEnDestino <= RN)) {
+					return FALSE;
+				}
 				Captura(pPosNueva, u32PiezaEnDestino, u32Hasta, BBMASK_HASTA);
+			}
 			break;
 		case TN:
 			/*
@@ -565,7 +644,12 @@ BOOL Mover(TPosicion * pPos,TJugada * pJug)
 			if (u32PiezaEnDestino == VACIO)
 				pPosNueva->u8Cincuenta++;	// No hay jugada irreversible
 			else
+			{
+				// FIX: Validate that we're not capturing our own piece
+				if ((u32PiezaEnDestino >= PN && u32PiezaEnDestino <= RN))
+					return FALSE;
 				Captura(pPosNueva, u32PiezaEnDestino, u32Hasta, BBMASK_HASTA);
+			}
 
 			// Puede que haya que quitar derechos de enroque
 			if (u32Desde == TAB_H8)
@@ -606,7 +690,12 @@ BOOL Mover(TPosicion * pPos,TJugada * pJug)
 			if (u32PiezaEnDestino == VACIO)
 				pPosNueva->u8Cincuenta++;	// No hay jugada irreversible
 			else
+			{
+				// FIX: Validate that we're not capturing our own piece
+				if ((u32PiezaEnDestino >= PN && u32PiezaEnDestino <= RN))
+					return FALSE;
 				Captura(pPosNueva, u32PiezaEnDestino, u32Hasta, BBMASK_HASTA);
+			}
 			break;
 		case RN:
 			/*
@@ -655,11 +744,21 @@ BOOL Mover(TPosicion * pPos,TJugada * pJug)
 				pPosNueva->u8Cincuenta++;
 			}
 			else
+			{
+				// FIX: Validate that we're not capturing our own piece
+				if ((u32PiezaEnDestino >= PN && u32PiezaEnDestino <= RN))
+					return FALSE;
 				Captura(pPosNueva, u32PiezaEnDestino, u32Hasta, BBMASK_HASTA);
+			}
 			break;
 		default:
-			__assume(0);
+			// FIX: Return FALSE instead of UNREACHABLE for invalid piece
+			return FALSE;
 	}
+
+	// FIX: Add boundary check before accessing arrays
+	if (pPosNueva->u8PosReyN > 63 || pPosNueva->u8PosReyB > 63)
+		return FALSE;
 
 	if (Pos_GetTurno(pPos) == NEGRAS)
 	{
@@ -703,6 +802,7 @@ BOOL Mover(TPosicion * pPos,TJugada * pJug)
 		else
 			Pos_SetNoJaqueado(pPosNueva);
 	}
+	assert(pJug);
 	pPosNueva->pListaJug = pJug + 1;
 	Pos_SetIntentarNull(pPosNueva);
 	pPosNueva->s32Eval = NO_EVAL;
