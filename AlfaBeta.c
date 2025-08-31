@@ -238,15 +238,15 @@ SINT32 AlfaBeta(TPosicion * pPos, SINT32 s32Alfa, SINT32 s32Beta, SINT32 s32Prof
 		//
 		// Podas basadas en hash
 		//
-		#define PODA_HASH_PROF_DIF 1			// Máxima diferencia permitida de profundidad entre acutal y hash
+		#define PODA_HASH_PROF_DIF 10			// Máxima diferencia permitida de profundidad entre acutal y hash
 
-		#define PODA_HASH_BETA_BASE 175			// Diferencia base contra beta
-		#define PODA_HASH_BETA_MULT_DIF 100		// Multiplicador por cada diferencia de profundidad adicional en beta
-		#define PODA_HASH_BETA_MULT_PROF 9		// Multiplicador por cada profundidad adicional en beta
+		#define PODA_HASH_BETA_BASE 185			// Diferencia base contra beta
+		#define PODA_HASH_BETA_MULT_DIF 0		// Multiplicador por cada diferencia de profundidad adicional en beta
+		#define PODA_HASH_BETA_MULT_PROF 13		// Multiplicador por cada profundidad adicional en beta
 
-		#define PODA_HASH_ALFA_BASE 250			// Diferencia base contra alfa
-		#define PODA_HASH_ALFA_MULT_DIF 100		// Multiplicador por cada diferencia de profundidad adicional en alfa
-		#define PODA_HASH_ALFA_MULT_PROF 13		// Multiplicador por cada profundidad adicional en alfa
+		#define PODA_HASH_ALFA_BASE 390			// Diferencia base contra alfa
+		#define PODA_HASH_ALFA_MULT_DIF 30		// Multiplicador por cada diferencia de profundidad adicional en alfa
+		#define PODA_HASH_ALFA_MULT_PROF 48		// Multiplicador por cada profundidad adicional en alfa
 
 		//
 		// Poda hash beta
@@ -257,7 +257,7 @@ SINT32 AlfaBeta(TPosicion * pPos, SINT32 s32Alfa, SINT32 s32Beta, SINT32 s32Prof
 			&& abs(s32EvalHash) < VICTORIA
 			&& s32EvalHash > s32Beta + PODA_HASH_BETA_BASE + PODA_HASH_BETA_MULT_DIF * max(s32Prof - s32ProfHash, 1) + PODA_HASH_BETA_MULT_PROF * s32Prof)
 		{
-			return(s32Beta); // OJO: puedo devolver más, para hacerlo más fail soft
+			return(s32Beta); // OJO: puedo devolver más, para hacerlo más fail soft (entre beta y eval hash)
 		}
 
 		//
@@ -269,7 +269,7 @@ SINT32 AlfaBeta(TPosicion * pPos, SINT32 s32Alfa, SINT32 s32Beta, SINT32 s32Prof
 			&& abs(s32EvalHash) < VICTORIA
 			&& s32EvalHash < s32Alfa - PODA_HASH_ALFA_BASE - PODA_HASH_ALFA_MULT_DIF * max(s32Prof - s32ProfHash, 1) - PODA_HASH_ALFA_MULT_PROF * s32Prof)
 		{
-			return(s32Alfa); // OJO: puedo devolver menos, para hacerlo más fail soft
+			return(s32Alfa); // OJO: puedo devolver menos, para hacerlo más fail soft (entre eval hash y alfa)
 		}
 	}
 	const SINT32 s32ProfOriginal = s32Prof;
